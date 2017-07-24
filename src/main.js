@@ -24,7 +24,7 @@ Vue.use(VueRouter)
 //   baseURL: 'http://192.168.82.53:8085/'
 // })
 Vue.prototype.$http = axios
-//Vue.use(ElementUI)
+Vue.use(ElementUI)
 
 let routes = [
   {

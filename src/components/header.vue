@@ -8,7 +8,8 @@
           <!--<span class="header-opacity">({{user.area}}/{{user.identity}})</span>-->
         </li>
         <li>退出系统</li>
-      </ul></header>
+      </ul>
+    </header>
   </div>
 </template>
 
@@ -19,9 +20,14 @@
       }
     },
     data () {
-      return {
+      return {}
+    },
+    created () {
+      this.user = {
+        'name': 'user'
       }
-    }
+    },
+    methods: {}
   }
 </script>
 <style>
@@ -37,22 +43,25 @@
     box-sizing: border-box;
     position: fixed;
   }
+
   .header-logo {
     display: inline-block;
     vertical-align: middle;
     color: #fff;
-    font-size:30px;
+    font-size: 30px;
     padding: 0 10px;
     margin: 0 10px;
     line-height: 80px;
     cursor: pointer;
   }
+
   .header-operations {
     display: inline-block;
     float: right;
     padding-right: 30px;
     height: 100%;
   }
+
   .header-operations li {
     color: #fff;
     display: inline-block;
@@ -62,12 +71,15 @@
     line-height: 80px;
     cursor: pointer;
   }
-  .header-operations li:first-child{
+
+  .header-operations li:first-child {
     cursor: default
   }
-  .header-opacity{
+
+  .header-opacity {
     opacity: .7;
   }
+
   .header-operations:after, header:after {
     display: inline-block;
     content: "";

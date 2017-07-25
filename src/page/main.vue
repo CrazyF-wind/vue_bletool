@@ -40,6 +40,7 @@
 
 <script type="text/ecmascript-6">
   import qs from 'qs'
+  import cookie from '../util/cookie'
 
   export default {
     data () {
@@ -77,6 +78,8 @@
     methods: {
       onScan () {
         console.log(this.$store.state.user)
+        // 从cookie获取userId
+        console.log(cookie.getCookie('userid'))
         // 获取扫描情况
         this.$http.post('/build', qs.stringify({'userid': '', 'flag': '', 'timer': ''})).then(response => {
           this.scan = JSON.stringify(response.data.scan)

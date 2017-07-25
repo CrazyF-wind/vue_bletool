@@ -18,6 +18,8 @@
 
 <script type="text/ecmascript-6">
   import qs from 'qs'
+  import cookie from '../util/cookie'
+
   export default {
     data () {
       var checkUserName = (rule, value, callback) => {
@@ -70,15 +72,22 @@
           pass: this.ruleForm.pass
         }
         this.$http.post('/login', qs.stringify(params)).then(res => {
+          console.log(JSON.stringify(res))
           if (res['data']['code'] === 0) {
-            // 用户名存入store
+            // 用户名存入store vuex
             this.$store.commit('isLogin', this.ruleForm.username)
+            // 用户名存入cookie
+            cookie.setCookie('username', res['data']['data']['username'], 365)
+            // 用户编号存入cookie
+            cookie.setCookie('userid', res['data']['data']['userid'], 365)
+            // 进入主页
             this.$router.push('/main')
           } else {
             alert('密码错误')
           }
         })
       }
+
     }
   }
 </script>

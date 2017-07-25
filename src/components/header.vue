@@ -14,20 +14,26 @@
 </template>
 
 <script>
+  import cookie from '../util/cookie'
+
   export default {
     props: {
-      user: {
-      }
+      user: {}
     },
     data () {
       return {}
     },
     created () {
+      let username = cookie.getCookie('username')
       this.user = {
-        'name': 'user'
+        'name': username
       }
     },
-    methods: {}
+    methods: {
+      quitSystem () {
+        cookie.clearCookie()
+      }
+    }
   }
 </script>
 <style>

@@ -81,6 +81,8 @@
           <el-button @click="clear_connect">清空</el-button>
           <el-button @click="print">导出记录excel</el-button>
           <el-button @click="result">导出结论excel</el-button>
+          <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage"
+                       style="margin-bottom: 22px;"></el-progress>
           <el-input type="textarea" :rows="15" v-model="connectList"></el-input>
           <el-form-item label="多任务测试" style="margin-top: 22px;">
             <el-button type="primary" @click="enqueue">入队</el-button>
@@ -137,7 +139,8 @@
         distances: [],
         connectList: [],
         wait_plan: [],
-        finish_plan: []
+        finish_plan: [],
+        percentage: 0
       }
     },
     created () {

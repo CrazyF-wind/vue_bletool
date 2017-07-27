@@ -44,6 +44,8 @@
             <el-input v-model="formInline.scan.testNum" placeholder="测试次数"></el-input>
           </el-form-item>
           <el-button type="primary" @click="begin_scan">运行</el-button>
+          <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage"
+                       style="margin-bottom: 22px;"></el-progress>
           <el-input type="textarea" :rows="15" v-model="scan" style="margin-bottom: 22px;"></el-input>
           <el-form-item label="测试环境">
             <el-select v-model="formInline.scan.env" placeholder="请选择">
@@ -95,10 +97,10 @@
     </el-row>
     <el-row>
       <el-col :span="12">
-        <el-input type="textarea" :rows="5" v-model="wait_plan"  placeholder="待处理.."></el-input>
+        <el-input type="textarea" :rows="5" v-model="wait_plan" placeholder="待处理.."></el-input>
       </el-col>
       <el-col :span="12">
-        <el-input type="textarea" :rows="5" v-model="finish_plan"  placeholder="已完成！"></el-input>
+        <el-input type="textarea" :rows="5" v-model="finish_plan" placeholder="已完成！"></el-input>
       </el-col>
     </el-row>
   </section>
@@ -136,7 +138,8 @@
         macs: [],
         parameters: [],
         mobiles: [],
-        distances: []
+        distances: [],
+        percentage: 0
       }
     },
     methods: {

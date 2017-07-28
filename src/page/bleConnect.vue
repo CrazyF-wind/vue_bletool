@@ -14,46 +14,9 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="设备名称">
-            <el-select v-model="formInline.connect.device">
-              <el-option
-                v-for="item in devices"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="设备mac">
-            <el-select v-model="formInline.connect.mac">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="连接参数">
-            <el-select v-model="formInline.connect.parameter" placeholder="请选择">
-              <el-option
-                v-for="item in parameters"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="手机型号">
-            <el-select v-model="formInline.connect.mobile" placeholder="请选择">
-              <el-option
-                v-for="item in mobiles"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <deviceMac @getDevice="getDeviceInfo"></deviceMac>
+          <!--<component :is="deviceMac"></component>-->
+          <component :is="mobileParam"></component>
           <el-form-item label="距离（米）">
             <el-select v-model="formInline.connect.distance" placeholder="请选择">
               <el-option
@@ -105,8 +68,15 @@
 
 <script type="text/ecmascript-6">
   import qs from 'qs'
+  import deviceMacComponent from '../components/deviceMac.vue'
+  import mobileParamComponent from '../components/mobileParam.vue'
 
   export default {
+    components: {
+      deviceMac: deviceMacComponent,
+//      deviceMacComponent,
+      mobileParamComponent
+    },
     data () {
       return {
         formInline: {
@@ -114,6 +84,7 @@
             env: '',
             device: '',
             mac: '',
+            deviceList: '',
             parameter: '',
             mobile: '',
             distance: 1,
@@ -133,14 +104,16 @@
         },
         envs: [],
         devices: [],
-        macList: [],
+//        macList: [],
         parameters: [],
         mobiles: [],
         distances: [],
         connectList: [],
         wait_plan: [],
         finish_plan: [],
-        percentage: 0
+        percentage: 0,
+//        deviceMac: 'deviceMacComponent',
+        mobileParam: 'mobileParamComponent'
       }
     },
     created () {
@@ -154,30 +127,13 @@
        * 获取距离参数
        */
       this.$http.post('/ble_get_distance', qs.stringify({'userid': ''})).then(response => {
-        this.distances = response.data.distance
-      })
-      /**
-       * 获取设备设备信息
-       */
-      this.$http.post('/ble_device_query', qs.stringify({'userid': '', 'flag': ''})).then(response => {
-        let temp = response.data.data.device_list
-        let tempList = []
-        temp.forEach(function (val) {
-          tempList.push({'label': val['name'], 'value': val['name'], macList: [{'label': val['mac']}]})
+        let distanceList = response.data.data.distance_list
+        let distance = []
+        distanceList.forEach(function (val, index) {
+          distance.push({'label': val, 'value': index})
         })
-        this.formInline.connect.device = response.data.data.device_list[0]['name']
-        this.devices = tempList
+        this.distances = distance
       })
-    },
-    computed: {
-      macs: {
-        get () {
-          let that = this
-          return this.devices.filter(function (item) {
-            return item.label === that.formInline.connect.device
-          })[0].macList
-        }
-      }
     },
     methods: {
       begin_connect () {
@@ -197,8 +153,7 @@
         })
       },
       stop_connect () {
-        console.log(this.macs)
-        console.log(this.devices)
+        alert(JSON.stringify(this.formInline.connect))
       },
       clear_connect () {
 
@@ -217,6 +172,11 @@
       },
       clear () {
 
+      },
+      getDeviceInfo (device, mac) {
+        console.log(`getDeviceList:${device},${mac}`)
+        this.formInline.connect.device = device
+        this.formInline.connect.mac = mac
       }
     }
   }

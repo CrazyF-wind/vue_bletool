@@ -30,9 +30,9 @@
     name: 'mobileParam',
     data () {
       return {
-        paramter: '',
+        parameter: '',
         mobile: '',
-        paramters: [],
+        parameters: [],
         mobiles: []
       }
     },
@@ -40,38 +40,45 @@
       /**
        * 获取扫描参数
        */
-      this.$http.post('ble_get_scan', qs.stringify({})).then(response=> {
+      this.$http.post('ble_get_scan', qs.stringify({})).then(response => {
         let scanParamList = response.data.data.scanParams
-        let scanParam = []
+        let scanParamCache = []
         scanParamList.forEach(function (val, index) {
-          scanParam.push({
+          scanParamCache.push({
             'label': val['scan_interval'] + '/' + val['scan_window'],
-            'value': val,
-            mobileList: {'label': ''}
+            'value': index
           })
         })
-      })
-
-      /**
-       * 根据扫描参数获取手机型号
-       */
-      this.$http.post('ble_get_scan_mobile', qs.stringify({})).then(response=> {
-
+        this.parameters = scanParamCache
+        this.parameter = scanParamList[0]['scan_interval'] + '/' + scanParamList[0]['scan_window']
       })
     },
-    computed: {
-      mobileLists: {
-        get () {
-          let that = this
-          return this.paramters.filter(function (item) {
-            return item.label === that.paramter
-          })[0]
-        }
-      }
-    },
-    method: {
+    methods: {
       getParamter () {
+        let params = (this.parameter).split('/')
+        let param = {
+          'scan_interval': params[0],
+          'scan_window': params[1]
+        }
 
+        /**
+         * 根据扫描参数获取手机型号
+         */
+        this.$http.post('ble_get_scan_mobile', qs.stringify(param)).then(response => {
+          let mobileList = response.data.data.scanMobiles
+          let mobileCache = []
+          mobileList.forEach(function (val, index) {
+            mobileCache.push({
+              'label': val['mobile'],
+              'value': index
+            })
+          })
+          this.mobiles = mobileCache
+          this.mobile = mobileList[0]['mobile']
+        })
+
+        // 在负组件中通过getMobile事件，传递扫描参数和手机型号值
+        this.$emit('getMobile', this.parameter, this.mobile)
       }
     }
   }

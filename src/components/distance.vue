@@ -30,7 +30,6 @@
       this.$http.post('/ble_get_distance', qs.stringify({'userid': ''})).then(response => {
         let distanceList = response.data.data.distance_list
         let distanceCache = []
-        console.log(`distance:${distanceList}`)
         distanceList.forEach(function (val) {
           distanceCache.push({'label': val, 'value': val})
         })

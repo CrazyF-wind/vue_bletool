@@ -31,7 +31,8 @@
       return {
         device: '',
         mac: '',
-        devices: []
+        devices: [],
+        macs: []
       }
     },
     created () {
@@ -39,40 +40,35 @@
        * 获取设备设备信息
        */
       this.$http.post('/ble_device_query', qs.stringify({'userid': '', 'flag': ''})).then(response => {
-        let temp = response.data.data.device_list
-        let tempList = []
-        temp.forEach(function (val) {
-          tempList.push({
+        let deviceList = response.data.data.device_list
+        let deviceCache = []
+        deviceList.forEach(function (val) {
+          deviceCache.push({
             'label': val['name'],
             'value': val['name'],
             macList: [{'label': val['mac']}]
           })
         })
         this.device = response.data.data.device_list[0]['name']
-        this.devices = tempList
-        console.log(`devices:${JSON.stringify(this.devices)}`)
-        console.log(`macs:${JSON.stringify(this.macs)}`)
+        this.devices = deviceCache
       })
     },
     computed: {
-      macs: {
+      macsList: {
         get () {
           let that = this
           return this.devices.filter(function (item) {
             return item.label === that.device
-          })[0].macList
+          })[0]     // .macList 提示未定义
         }
       }
     },
     methods: {
       getDeviceValue () {
+        this.macs = this.macsList.macList
+        // 在父组件中通过getDevice事件传递device和mac
         this.$emit('getDevice', this.device, this.macs[0]['label'])
-      }
-    },
-    mounted: {
-      // 第一次加载时，先执行一遍，否则父组件内获取不到device和mac
-      getDeviceValue () {
-        this.$emit('getDevice', this.device, this.macs[0]['label'])
+        this.mac = this.macs[0]['label']
       }
     }
   }

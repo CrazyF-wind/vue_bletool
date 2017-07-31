@@ -40,22 +40,23 @@
       /**
        * 获取扫描参数
        */
-      this.$http.post('ble_get_scan', qs.stringify({})).then(response => {
-        let scanParamList = response.data.data.scanParams
+      this.$http.post('/config/ble_get_scan', qs.stringify({})).then(response => {
+        let scanParamList = response.data.data
         let scanParamCache = []
-        scanParamList.forEach(function (val, index) {
+        scanParamList.forEach(function (val) {
           scanParamCache.push({
-            'label': val['scan_interval'] + '/' + val['scan_window'],
-            'value': index
+            'label': val['_id']['scan_interval'] + '/' + val['_id']['scan_window'],
+            'value': val['_id']['scan_interval'] + '/' + val['_id']['scan_window']
           })
         })
         this.parameters = scanParamCache
-        this.parameter = scanParamList[0]['scan_interval'] + '/' + scanParamList[0]['scan_window']
+        this.parameter = scanParamList[0]['_id']['scan_interval'] + '/' + scanParamList[0]['_id']['scan_window']
       })
     },
     methods: {
       getParamter () {
-        let params = (this.parameter).split('/')
+        console.log(`this.parameter:${(this.parameter).toString()}`)
+        let params = (this.parameter).toString().split('/')
         let param = {
           'scan_interval': params[0],
           'scan_window': params[1]
@@ -64,13 +65,13 @@
         /**
          * 根据扫描参数获取手机型号
          */
-        this.$http.post('ble_get_scan_mobile', qs.stringify(param)).then(response => {
-          let mobileList = response.data.data.scanMobiles
+        this.$http.post('/config/ble_get_scan_mobile', qs.stringify(param)).then(response => {
+          let mobileList = response.data.data
           let mobileCache = []
-          mobileList.forEach(function (val, index) {
+          mobileList.forEach(function (val) {
             mobileCache.push({
               'label': val['mobile'],
-              'value': index
+              'value': val['mobile']
             })
           })
           this.mobiles = mobileCache

@@ -7,29 +7,30 @@ export default {
   mockData () {
     Mock.mock('/login', {
       'code': 0,
-      'datas': {
-        'name': '@name'
+      'data': {
+        'username': '@name',
+        'userid': '1234'
       }
     })
 
     Mock.mock('/ble_env_query', {
       'code': 0,
-      'flag|2-4': [
-        {
-          'label': '@date(yyyy-MM-dd)',
-          'value': '@natural(10, 100)'
-        }
-      ]
+      'data': {
+        'env_list': [
+          {
+            'flag': 'test'
+          }, {
+            'flag': 'AM3S'
+          }
+        ]
+      }
     })
 
     Mock.mock('/ble_get_distance', {
       'code': 0,
-      'distance|3-5': [
-        {
-          'label|1-10': 100,
-          'value': '@natural(10, 100)'
-        }
-      ]
+      'data': {
+        'distance_list': [1, 1.5]
+      }
     })
 
     Mock.mock('/build', {
@@ -83,6 +84,34 @@ export default {
           {
             'mac': '01:4d:32:00:00:03',
             'name': 'HS2'
+          }
+        ]
+      }
+    })
+
+    Mock.mock('ble_get_scan', {
+      code: 0,
+      data: {
+        'scanParams': [
+          {
+            'scan_interval': '5000',
+            'scan_window': '5000'
+          }, {
+            'scan_interval': '60',
+            'scan_window': '30'
+          }
+        ]
+      }
+    })
+
+    Mock.mock('ble_get_scan_mobile',{
+      code:0,
+      data:{
+        'scanMobiles':[
+          {
+            'mobile':'Nexus 5'
+          },{
+            'mobile':'Nexus 6'
           }
         ]
       }

@@ -109,9 +109,11 @@
         console.log(param)
         // 获取扫描情况
         this.$http.post('http://192.168.82.53:8085/DeviceInit', qs.stringify(param)).then(response => {
-          this.scan = JSON.stringify(response.data)
+          let that = this     // 把this继承过来以后重新封装一下，否则queryOnce无法在setTimeout中使用
+          setTimeout(function () {
+            that.$message.info(`${JSON.stringify(response.data)}`, 'INFO!')
+          }, Number(this.formInline.env.timer) * 1000)
         })
-
         // 开始查询
         this.beginTime = new Date().getTime()
         this.queryOnce()
@@ -120,15 +122,22 @@
         let change = new Date().getTime() - this.beginTime
         if (change > Number(this.formInline.env.timer) * 1000) {
           this.percentage = 100
-          console.log('stop')
+          this.$http.post('/ble_device_query', qs.stringify({'userid': '', 'flag': ''})).then(response => {
+            this.scan = JSON.stringify(response.data)
+            let scanList = response.data.data.device_list
+            let scan = ''
+            scanList.forEach(function (val, index) {
+              scan += `${index + 1}.mac:${val['mac']},name:${val['name']}\n`
+            })
+            this.scan = scan
+          })
           return
         } else {
-          let that = this
+          let that = this     // 把this继承过来以后重新封装一下，否则queryOnce无法在setTimeout中使用
           this.percentage = parseInt((change / 1000) / Number(this.formInline.env.timer) * 100)
-          console.log('this.percentage:' + this.percentage)
           setTimeout(function () {
             that.queryOnce()
-          }, 1000)
+          }, 100)
         }
       }
     }

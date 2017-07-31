@@ -16,6 +16,8 @@ import BleScanChart from '@/page/bleScanChart'
 import BtConnect from '@/page/btConnect'
 import Config from '@/page/config'
 
+import parent from '@/page/parent'
+
 import Mock from './mock/mock'
 Mock.mockData()
 
@@ -41,7 +43,8 @@ let routes = [
       {path: '/bleConnect_chart', component: BleConnectChart, name: '连接曲线', class: 'fa-area-chart'},
       {path: '/bleScan_chart', component: BleScanChart, name: '扫描曲线', class: 'fa-area-chart'},
       {path: '/btConnect', component: BtConnect, name: '经典蓝牙', class: 'fa-bluetooth'},
-      {path: '/config', component: Config, name: '系统设置', class: 'fa-cog'}
+      {path: '/config', component: Config, name: '系统设置', class: 'fa-cog'},
+      {path: '/login', component: parent, name: '登录', class: 'fa-cog'}
     ]
   }
 ]

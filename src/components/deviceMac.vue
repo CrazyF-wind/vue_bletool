@@ -1,5 +1,15 @@
 <template>
   <div>
+    <el-form-item label="测试环境">
+      <el-select v-model="env" @change="getEnvValue" placeholder="请选择">
+        <el-option
+          v-for="item in envs"
+          :label="item.label"
+          :value="item.value"
+          :key="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
     <el-form-item label="设备名称">
       <el-select v-model="device" @change="getDeviceValue">
         <el-option
@@ -25,32 +35,37 @@
 
 <script type="text/ecmascript-6">
   import qs from 'qs'
+  import cookie from '../util/cookie'
 
   export default {
     data () {
       return {
+        env: '',
         device: '',
         mac: '',
+        envs: '',
         devices: [],
-        macs: []
+        macs: [],
+        userid: ''
       }
     },
+    beforeCreate () {
+
+    },
     created () {
+      this.userid = cookie.getCookie('userid')
+      console.log(`created userId:${this.userid}`)
       /**
-       * 获取设备设备信息
+       * 获取扫描环境参数
        */
-      this.$http.post('/ble_device_query', qs.stringify({'userid': '', 'flag': ''})).then(response => {
-        let deviceList = response.data.data.device_list
-        let deviceCache = []
-        deviceList.forEach(function (val) {
-          deviceCache.push({
-            'label': val['name'],
-            'value': val['name'],
-            macList: [{'label': val['mac']}]
-          })
+      this.$http.post('/config/ble_env_query', qs.stringify({'userid': this.userid})).then(response => {
+        let envList = response.data.data
+        let envCache = []
+        envList.forEach(function (val) {
+          envCache.push({'label': val['_id']['flag'], 'value': val['_id']['flag']})
         })
-        this.device = response.data.data.device_list[0]['name']
-        this.devices = deviceCache
+        this.envs = envCache
+        this.env = envList[0]['_id']['flag']
       })
     },
     computed: {
@@ -58,16 +73,46 @@
         get () {
           let that = this
           return this.devices.filter(function (item) {
-            return item.label === that.device
+            console.log(`item.value:${item.value},that.device${that.device}`)
+            return item.value === that.device
           })[0]     // .macList 提示未定义
         }
       }
     },
     methods: {
+      getEnvValue () {
+        this.devices = []     // 格式化设备列表
+        this.macs = []        // 格式化mac
+        this.device = ''
+        this.mac = ''
+        let params = {
+          'userid': this.userid,
+          'flag': this.env
+        }
+        console.log(`params:${JSON.stringify(params)}`)
+        /**
+         * 获取设备设备信息
+         */
+        this.$http.post('/config/ble_device_query', qs.stringify(params)).then(response => {
+          let deviceList = response.data.data
+          let deviceCache = []
+          deviceList.forEach(function (val) {
+            deviceCache.push({
+              'label': val['_id']['name'],
+              'value': val['_id']['mac'],
+              macList: [{'label': val['_id']['mac']}]
+            })
+          })
+          this.device = deviceList[0]['_id']['name']
+          this.devices = deviceCache
+          this.mac = deviceList[0]['_id']['mac']
+        })
+      },
       getDeviceValue () {
+        console.log(`macs:${JSON.stringify(this.macsList)}`)
         this.macs = this.macsList.macList
         // 在父组件中通过getDevice事件传递device和mac
-        this.$emit('getDevice', this.device, this.macs[0]['label'])
+        this.$emit('getDevice', this.env, this.device, this.macs[0]['label'])
         this.mac = this.macs[0]['label']
       }
     }

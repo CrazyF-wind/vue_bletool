@@ -3,7 +3,7 @@
     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
       <span class="heading">用户登录</span>
       <el-form-item label="用户名" prop="username">
-        <el-input v-model.number="ruleForm.username"></el-input>
+        <el-input v-model="ruleForm.username"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="pass">
         <el-input type="password" v-model="ruleForm.pass" auto-complete="off"></el-input>
@@ -11,6 +11,7 @@
       <el-form-item>
         <el-button type="primary" @click="login()">登录</el-button>
         <el-button @click="resetForm('ruleForm')">重置</el-button>
+        <el-button @click="register">注册</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -19,6 +20,7 @@
 <script type="text/ecmascript-6">
   import qs from 'qs'
   import cookie from '../util/cookie'
+  import md5 from 'md5'
 
   export default {
     data () {
@@ -69,25 +71,28 @@
       login () {
         let params = {
           username: this.ruleForm.username,
-          pass: this.ruleForm.pass
+          password: md5(this.ruleForm.pass)
         }
-        this.$http.post('/login', qs.stringify(params)).then(res => {
-          console.log(JSON.stringify(res))
-          if (res['data']['code'] === 0) {
+        console.log(`params:${this.ruleForm.username}`)
+        this.$http.post('/users/login', qs.stringify(params)).then(res => {
+          console.log(`res.data:${JSON.stringify(res.data.data)}`)
+          if (res.data.status.code === 1010100) {
             // 用户名存入store vuex
             this.$store.commit('isLogin', this.ruleForm.username)
             // 用户名存入cookie
-            cookie.setCookie('username', res['data']['data']['username'], 365)
+            cookie.setCookie('username', res.data.data.username, 365)
             // 用户编号存入cookie
-            cookie.setCookie('userid', res['data']['data']['userid'], 365)
+            cookie.setCookie('userid', res.data.data.userid, 365)
             // 进入主页
             this.$router.push('/main')
           } else {
-            alert('密码错误')
+            this.$message.error(res.data.status.sub_msg, 'ERROR!')
           }
         })
+      },
+      register () {
+        this.$router.push('/register')
       }
-
     }
   }
 </script>

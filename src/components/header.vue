@@ -7,7 +7,7 @@
           <span class="header-lang is-active">{{user.name}}</span>
           <!--<span class="header-opacity">({{user.area}}/{{user.identity}})</span>-->
         </li>
-        <li>退出系统</li>
+        <li><el-label @click="quitSystem">退出系统</el-label></li>
       </ul>
     </header>
   </div>
@@ -32,6 +32,7 @@
     methods: {
       quitSystem () {
         cookie.clearCookie()
+        this.$router.push('/')
       }
     }
   }

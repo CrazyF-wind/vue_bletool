@@ -8,6 +8,7 @@ import App from './App'
 import 'font-awesome/css/font-awesome.min.css'
 
 import Login from '@/page/login'
+import Register from '@/page/register'
 import Main from '@/page/main'
 import BleConnect from '@/page/bleConnect'
 import BleScan from '@/page/bleScan'
@@ -20,10 +21,10 @@ import Mock from './mock/mock'
 Mock.mockData()
 
 Vue.use(VueRouter)
-// var $http = axios.create({
-//   baseURL: 'http://192.168.82.53:8085/'
-// })
-Vue.prototype.$http = axios
+var $http = axios.create({
+  baseURL: 'http://10.0.0.10:3000/api/'
+})
+Vue.prototype.$http = $http
 Vue.use(ElementUI)
 
 let routes = [
@@ -38,11 +39,15 @@ let routes = [
       {path: '/main', component: Main, name: '首页', class: 'fa-home'},
       {path: '/bleConnect', component: BleConnect, name: '连接测试', class: 'fa-bluetooth-b'},
       {path: '/bleScan', component: BleScan, name: '扫描测试', class: 'fa-bluetooth-b'},
-      {path: '/bleConnect_chart', component: BleConnectChart, name: '连接曲线', class: 'fa-area-chart'},
-      {path: '/bleScan_chart', component: BleScanChart, name: '扫描曲线', class: 'fa-area-chart'},
+      {path: '/bleConnectChart', component: BleConnectChart, name: '连接曲线', class: 'fa-area-chart'},
+      {path: '/bleScanChart', component: BleScanChart, name: '扫描曲线', class: 'fa-area-chart'},
       {path: '/btConnect', component: BtConnect, name: '经典蓝牙', class: 'fa-bluetooth'},
-      {path: '/config', component: Config, name: '系统设置', class: 'fa-cog'},
+      {path: '/config', component: Config, name: '系统设置', class: 'fa-cog'}
     ]
+  }, {
+    path: '/register',
+    component: Register,
+    name: '注册'
   }
 ]
 

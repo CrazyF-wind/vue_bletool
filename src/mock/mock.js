@@ -104,14 +104,14 @@ export default {
       }
     })
 
-    Mock.mock('ble_get_scan_mobile',{
-      code:0,
-      data:{
-        'scanMobiles':[
+    Mock.mock('ble_get_scan_mobile', {
+      code: 0,
+      data: {
+        'scanMobiles': [
           {
-            'mobile':'Nexus 5'
-          },{
-            'mobile':'Nexus 6'
+            'mobile': 'Nexus 5'
+          }, {
+            'mobile': 'Nexus 6'
           }
         ]
       }

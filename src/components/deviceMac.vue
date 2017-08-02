@@ -49,9 +49,6 @@
         userid: ''
       }
     },
-    beforeCreate () {
-
-    },
     created () {
       this.userid = cookie.getCookie('userid')
       console.log(`created userId:${this.userid}`)

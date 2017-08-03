@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="float:left;">
     <el-form-item label="距离（米）">
       <el-select v-model="distance" @change="getDistanceValue" placeholder="请选择">
         <el-option

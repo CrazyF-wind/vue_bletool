@@ -1,69 +1,12 @@
-<template>
-  <div class="chart-container">
+<template xmlns="http://www.w3.org/1999/html">
+  <section>
     <el-row>
       <el-col :span="24">
         <!--表单-->
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
-          <el-form-item label="测试环境">
-            <el-select v-model="formInline.connect.env" placeholder="请选择">
-              <el-option
-                v-for="item in envs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="设备名称">
-            <el-select v-model="formInline.connect.device" placeholder="请选择">
-              <el-option
-                v-for="item in devices"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="设备mac">
-            <el-select v-model="formInline.connect.mac" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="连接参数">
-            <el-select v-model="formInline.connect.parameters" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="手机型号">
-            <el-select v-model="formInline.connect.mobile" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="距离（米）">
-            <el-select v-model="formInline.connect.distance" placeholder="请选择">
-              <el-option
-                v-for="item in distances"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <deviceMac @getDevice="getDeviceInfo"></deviceMac>
+          <connectMobile @getMobile="getMobileInfo"></connectMobile>
+          <distance @getDistance="getDistanceInfo"></distance>
           <el-form-item label="flag">
             <el-input v-model="formInline.connect.flag" placeholder="flag"></el-input>
           </el-form-item>
@@ -74,14 +17,23 @@
         <div id="ConnectChart" style="height: 650px">图表加载失败</div>
       </el-col>
     </el-row>
-  </div>
+  </section>
 </template>
 
 <script type="text/ecmascript-6">
   import echarts from 'echarts'
   import qs from 'qs'
+  import cookie from '../util/cookie'
+  import deviceMacComponent from '../components/deviceMac.vue'
+  import connectMobileComponent from '../components/connectMobile.vue'
+  import distanceComponent from '../components/distance.vue'
 
   export default {
+    components: {
+      deviceMac: deviceMacComponent,
+      connectMobile: connectMobileComponent,
+      distance: distanceComponent
+    },
     data () {
       return {
         formInline: {
@@ -111,21 +63,29 @@
         macs: [],
         parameters: [],
         mobiles: [],
-        distances: []
+        distances: [],
+        userid: ''
       }
+    },
+    created () {
+      this.userid = cookie.getCookie('userid')
     },
     methods: {
       queryConnect () {
+        console.log(this)
+        alert(JSON.stringify(this.formInline.connect))
         let params = {
-          'mac': '00:4d:32:07:92:09',          // 字母统一小写
-          'name': 'AM4',                       // 设备名称
-          'mi': 5,                             // 连接距离,单位:米
-          'mobile': 'Nexus 5',                 // 手机型号
-          'flag': '',                          // 连接标记说明
-          'userid': ''                         // 用户编号
+          'mac': this.formInline.connect.mac,
+          'name': this.formInline.connect.name,
+          'mi': this.formInline.connect.distance,
+          'mobile': this.formInline.connect.mobile,
+          'flag': this.formInline.connect.flag,
+          'userid': this.userid
         }
         // 获取连接测试结果
-        this.$http.post('/ble_connect_query', qs.stringify(params)).then(response => {
+        this.$http.post('/connect/ble_connect_query', qs.stringify(params)).then(response => {
+          console.log(`Params:${JSON.stringify(params)}`)
+          console.log(`connect chart:${JSON.stringify(response.data.data)}`)
           const myChart = echarts.init(document.getElementById('ConnectChart'))
           let option = {
             title: {
@@ -179,7 +139,7 @@
                 symbolSize: 10,
                 data: (function () {
                   let d = []
-                  let temp = response.data.data.connect_list
+                  let temp = response.data.data
                   temp.forEach(function (val, index) {
                     d.push([index, val['ConnectionTime']])
                   })
@@ -190,6 +150,20 @@
           }
           myChart.setOption(option)
         })
+      },
+
+      getDeviceInfo (env, device, mac) {
+        console.log(`env:${env},${device},${mac}`)
+        this.formInline.connect.env = env
+        this.formInline.connect.device = device
+        this.formInline.connect.mac = mac
+      },
+      getMobileInfo (parameter, mobile) {
+        this.formInline.connect.parameter = parameter
+        this.formInline.connect.mobile = mobile
+      },
+      getDistanceInfo (distance) {
+        this.formInline.connect.distance = distance
       }
     }
   }

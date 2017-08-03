@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="float:left;">
     <el-form-item label="测试环境">
       <el-select v-model="env" @change="getEnvValue" placeholder="请选择">
         <el-option
@@ -70,8 +70,8 @@
         get () {
           let that = this
           return this.devices.filter(function (item) {
-            console.log(`item.value:${item.value},that.device${that.device}`)
-            return item.value === that.device
+            console.log(`item.value:${item.label},that.device${that.device}`)
+            return item.label === that.device
           })[0]     // .macList 提示未定义
         }
       }
@@ -96,7 +96,7 @@
           deviceList.forEach(function (val) {
             deviceCache.push({
               'label': val['_id']['name'],
-              'value': val['_id']['mac'],
+              'value': val['_id']['name'],
               macList: [{'label': val['_id']['mac']}]
             })
           })

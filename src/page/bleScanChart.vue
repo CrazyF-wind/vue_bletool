@@ -7,73 +7,15 @@
           <el-form-item label="扫描时间（秒）">
             <el-input v-model="formInline.scan.timer" placeholder="flag"></el-input>
           </el-form-item>
-          <el-form-item label="连接参数">
-            <el-select v-model="formInline.scan.parameters" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="手机型号">
-            <el-select v-model="formInline.scan.mobile" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="距离（米）">
-            <el-select v-model="formInline.scan.distance" placeholder="请选择">
-              <el-option
-                v-for="item in distances"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <scanMobile @getMobile="getMobileInfo"></scanMobile>
+          <distance @getDistance="getDistanceInfo"></distance>
           <el-form-item label="flag">
             <el-input v-model="formInline.scan.flag" placeholder="flag"></el-input>
           </el-form-item>
           <el-form-item label="测试次数">
             <el-input v-model="formInline.scan.testNum" placeholder="测试次数"></el-input>
           </el-form-item>
-
-          <el-form-item label="测试环境">
-            <el-select v-model="formInline.scan.env" placeholder="请选择">
-              <el-option
-                v-for="item in envs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="设备名称">
-            <el-select v-model="formInline.scan.device" placeholder="请选择">
-              <el-option
-                v-for="item in devices"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="设备mac">
-            <el-select v-model="formInline.scan.mac" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <deviceMac @getDevice="getDeviceInfo"></deviceMac>
           <el-button type="primary" @click="queryscan">查询</el-button>
         </el-form>
       </el-col>
@@ -87,10 +29,18 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import qs from 'qs'
   import echarts from 'echarts'
+  import qs from 'qs'
+  import deviceMacComponent from '../components/deviceMac.vue'
+  import scanMobileComponent from '../components/scanMobile.vue'
+  import distanceComponent from '../components/distance.vue'
 
   export default {
+    components: {
+      deviceMac: deviceMacComponent,
+      scanMobile: scanMobileComponent,
+      distance: distanceComponent
+    },
     data () {
       return {
         formInline: {
@@ -197,6 +147,19 @@
           }
           myChart.setOption(option)
         })
+      },
+
+      getDeviceInfo (env, device, mac) {
+        this.formInline.scan.env = env
+        this.formInline.scan.device = device
+        this.formInline.scan.mac = mac
+      },
+      getMobileInfo (parameter, mobile) {
+        this.formInline.scan.parameter = parameter
+        this.formInline.scan.mobile = mobile
+      },
+      getDistanceInfo (distance) {
+        this.formInline.scan.distance = distance
       }
     }
   }

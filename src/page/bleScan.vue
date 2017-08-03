@@ -7,36 +7,8 @@
           <el-form-item label="扫描时间（秒）">
             <el-input v-model="formInline.scan.timer" placeholder="flag"></el-input>
           </el-form-item>
-          <el-form-item label="连接参数">
-            <el-select v-model="formInline.scan.parameters" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="手机型号">
-            <el-select v-model="formInline.scan.mobile" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="距离（米）">
-            <el-select v-model="formInline.scan.distance" placeholder="请选择">
-              <el-option
-                v-for="item in distances"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <scanMobile @getMobile="getMobileInfo"></scanMobile>
+          <distance @getDistance="getDistanceInfo"></distance>
           <el-form-item label="flag">
             <el-input v-model="formInline.scan.flag" placeholder="flag"></el-input>
           </el-form-item>
@@ -47,36 +19,7 @@
           <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage"
                        style="margin-bottom: 22px;"></el-progress>
           <el-input type="textarea" :rows="15" v-model="scan" style="margin-bottom: 22px;"></el-input>
-          <el-form-item label="测试环境">
-            <el-select v-model="formInline.scan.env" placeholder="请选择">
-              <el-option
-                v-for="item in envs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="设备名称">
-            <el-select v-model="formInline.scan.device" placeholder="请选择">
-              <el-option
-                v-for="item in devices"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="设备mac">
-            <el-select v-model="formInline.scan.mac" placeholder="请选择">
-              <el-option
-                v-for="item in macs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <deviceMac @getDevice="getDeviceInfo"></deviceMac>
           <el-form-item>
             <el-button @click="print">导出记录excel</el-button>
             <el-button @click="result">导出结论excel</el-button>
@@ -108,7 +51,16 @@
 
 <script type="text/ecmascript-6">
   import qs from 'qs'
+  import deviceMacComponent from '../components/deviceMac.vue'
+  import scanMobileComponent from '../components/scanMobile.vue'
+  import distanceComponent from '../components/distance.vue'
+
   export default {
+    components: {
+      deviceMac: deviceMacComponent,
+      scanMobile: scanMobileComponent,
+      distance: distanceComponent
+    },
     data () {
       return {
         formInline: {
@@ -144,6 +96,7 @@
     },
     methods: {
       begin_scan () {
+        alert(JSON.stringify(this.formInline.scan))
         var params = {
           'name': 'Tom'
         }
@@ -152,6 +105,18 @@
         }).catch(err => {
           this.$message.error(`${err.message}`, 'ERROR!')
         })
+      },
+      getDeviceInfo (env, device, mac) {
+        this.formInline.scan.env = env
+        this.formInline.scan.device = device
+        this.formInline.scan.mac = mac
+      },
+      getMobileInfo (parameter, mobile) {
+        this.formInline.scan.parameter = parameter
+        this.formInline.scan.mobile = mobile
+      },
+      getDistanceInfo (distance) {
+        this.formInline.scan.distance = distance
       }
     }
   }

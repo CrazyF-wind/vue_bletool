@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="float:left;">
     <el-form-item label="连接参数">
       <el-select v-model="parameter" @change="getParamter" placeholder="请选择">
         <el-option
@@ -11,7 +11,7 @@
       </el-select>
     </el-form-item>
     <el-form-item label="手机型号">
-      <el-select v-model="mobile" placeholder="请选择">
+      <el-select v-model="mobile" @change="getMobileValue" placeholder="请选择">
         <el-option
           v-for="item in mobiles"
           :label="item.label"
@@ -77,8 +77,9 @@
           this.mobiles = mobileCache
           this.mobile = mobileList[0]['mobile']
         })
-
-        // 在负组件中通过getMobile事件，传递扫描参数和手机型号值
+      },
+      getMobileValue () {
+        // 在负组件中通过getMobile事件，传递连接参数和手机型号值
         this.$emit('getMobile', this.parameter, this.mobile)
       }
     }

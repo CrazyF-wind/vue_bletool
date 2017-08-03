@@ -4,29 +4,9 @@
       <el-col :span="24">
         <!--表单-->
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
-          <el-form-item label="测试环境">
-            <el-select v-model="formInline.connect.env" placeholder="请选择">
-              <el-option
-                v-for="item in envs"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
           <deviceMac @getDevice="getDeviceInfo"></deviceMac>
-          <!--<component :is="deviceMac"></component>-->
-          <component :is="mobileParam"></component>
-          <el-form-item label="距离（米）">
-            <el-select v-model="formInline.connect.distance" placeholder="请选择">
-              <el-option
-                v-for="item in distances"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <connectMobileobile @getMobile="getMobileInfo"></connectMobileobile>
+          <distance @getDistance="getDistanceInfo"></distance>
           <el-form-item label="flag">
             <el-input v-model="formInline.connect.flag" placeholder="flag"></el-input>
           </el-form-item>
@@ -68,14 +48,16 @@
 
 <script type="text/ecmascript-6">
   import qs from 'qs'
+  import Cookie from '../util/cookie'
   import deviceMacComponent from '../components/deviceMac.vue'
-  import mobileParamComponent from '../components/mobileParam.vue'
+  import connectMobileComponent from '../components/connectMobile.vue'
+  import distanceComponent from '../components/distance.vue'
 
   export default {
     components: {
       deviceMac: deviceMacComponent,
-//      deviceMacComponent,
-      mobileParamComponent
+      connectMobile: connectMobileComponent,
+      distance: distanceComponent
     },
     data () {
       return {
@@ -102,38 +84,15 @@
           flag: '',
           testNum: ''
         },
-        envs: [],
-        devices: [],
-//        macList: [],
-        parameters: [],
-        mobiles: [],
-        distances: [],
+        userid: '',
         connectList: [],
         wait_plan: [],
         finish_plan: [],
-        percentage: 0,
-//        deviceMac: 'deviceMacComponent',
-        mobileParam: 'mobileParamComponent'
+        percentage: 0
       }
     },
     created () {
-      /**
-       * 获取扫描环境参数
-       */
-      this.$http.post('/ble_env_query', qs.stringify({'userid': ''})).then(response => {
-        this.flags = response.data.flag
-      })
-      /**
-       * 获取距离参数
-       */
-      this.$http.post('/ble_get_distance', qs.stringify({'userid': ''})).then(response => {
-        let distanceList = response.data.data.distance_list
-        let distance = []
-        distanceList.forEach(function (val, index) {
-          distance.push({'label': val, 'value': index})
-        })
-        this.distances = distance
-      })
+      this.userid = Cookie.getCookie('userid')
     },
     methods: {
       begin_connect () {
@@ -173,10 +132,17 @@
       clear () {
 
       },
-      getDeviceInfo (device, mac) {
-        console.log(`getDeviceList:${device},${mac}`)
+      getDeviceInfo (env, device, mac) {
+        this.formInline.connect.env = env
         this.formInline.connect.device = device
         this.formInline.connect.mac = mac
+      },
+      getMobileInfo (parameter, mobile) {
+        this.formInline.connect.parameter = parameter
+        this.formInline.connect.mobile = mobile
+      },
+      getDistanceInfo (distance) {
+        this.formInline.connect.distance = distance
       }
     }
   }

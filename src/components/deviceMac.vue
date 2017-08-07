@@ -21,7 +21,7 @@
       </el-select>
     </el-form-item>
     <el-form-item label="设备mac">
-      <el-select v-model="mac">
+      <el-select v-model="mac" @change="getMacValue">
         <el-option
           v-for="item in macs"
           :label="item.label"
@@ -65,17 +65,6 @@
         this.env = envList[0]['_id']['flag']
       })
     },
-    computed: {
-      macsList: {
-        get () {
-          let that = this
-          return this.devices.filter(function (item) {
-            console.log(`item.value:${item.label},that.device${that.device}`)
-            return item.label === that.device
-          })[0]     // .macList 提示未定义
-        }
-      }
-    },
     methods: {
       getEnvValue () {
         this.devices = []     // 格式化设备列表
@@ -88,29 +77,50 @@
         }
         console.log(`params:${JSON.stringify(params)}`)
         /**
-         * 获取设备设备信息
+         * 获取设备名称
          */
-        this.$http.post('/config/ble_device_query', qs.stringify(params)).then(response => {
+        this.$http.post('/config/ble_name_query', qs.stringify(params)).then(response => {
           let deviceList = response.data.data
           let deviceCache = []
           deviceList.forEach(function (val) {
             deviceCache.push({
               'label': val['_id']['name'],
-              'value': val['_id']['name'],
-              macList: [{'label': val['_id']['mac']}]
+              'value': val['_id']['name']
             })
           })
-          this.device = deviceList[0]['_id']['name']
           this.devices = deviceCache
-          this.mac = deviceList[0]['_id']['mac']
+          this.device = deviceList[0]['_id']['name']
         })
       },
       getDeviceValue () {
-        console.log(`macs:${JSON.stringify(this.macsList)}`)
-        this.macs = this.macsList.macList
+        let params = {
+          'userid': this.userid,
+          'flag': this.env,
+          'name': this.device
+        }
+        /**
+         * 获取设备mac
+         */
+        this.$http.post('/config/ble_mac_query', qs.stringify(params)).then(response => {
+          let macList = response.data.data
+          let macCache = []
+          macList.forEach(function (val) {
+            macCache.push({
+              'label': val['_id']['mac'],
+              'value': val['_id']['mac']
+            })
+          })
+          this.macs = macCache
+          this.mac = macList[0]['_id']['mac']
+
+          // 在父组件中通过getDevice事件传递device和mac
+          this.$emit('getDevice', this.env, this.device, this.mac)
+        })
+      },
+      getMacValue () {
+        console.log(`mac:${this.mac}`)
         // 在父组件中通过getDevice事件传递device和mac
-        this.$emit('getDevice', this.env, this.device, this.macs[0]['label'])
-        this.mac = this.macs[0]['label']
+        this.$emit('getDevice', this.env, this.device, this.mac)
       }
     }
   }

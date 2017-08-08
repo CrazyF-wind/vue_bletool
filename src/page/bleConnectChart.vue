@@ -72,20 +72,17 @@
     },
     methods: {
       queryConnect () {
-        console.log(this)
-        alert(JSON.stringify(this.formInline.connect))
         let params = {
           'mac': this.formInline.connect.mac,
-          'name': this.formInline.connect.name,
-          'mi': this.formInline.connect.distance,
+          'name': this.formInline.connect.device,
+          'mi': Number(this.formInline.connect.distance),
           'mobile': this.formInline.connect.mobile,
           'flag': this.formInline.connect.flag,
           'userid': this.userid
         }
         // 获取连接测试结果
-        this.$http.post('/connect/ble_connect_query', qs.stringify(params)).then(response => {
-          console.log(`Params:${JSON.stringify(params)}`)
-          console.log(`connect chart:${JSON.stringify(response.data.data)}`)
+        this.$http.post('/ble_connect/query', qs.stringify(params)).then(response => {
+          let connectList = response.data.data
           const myChart = echarts.init(document.getElementById('ConnectChart'))
           let option = {
             title: {
@@ -105,7 +102,7 @@
               zlevel: 1
             },
             legend: {
-              data: ['AM3S']
+              data: [connectList[0]['name']]
             },
             toolbox: {
               show: true,
@@ -125,25 +122,24 @@
             ],
             yAxis: [
               {
-                min: 0,
-                max: 2500,
+//                min: 0,
+//                max: 2500,
                 type: 'value',
                 scale: true
               }
             ],
             series: [
               {
-                name: 'AM3S',
+                name: connectList[0]['name'],
                 type: 'scatter',
                 large: true,
                 symbolSize: 10,
                 data: (function () {
-                  let d = []
-                  let temp = response.data.data
-                  temp.forEach(function (val, index) {
-                    d.push([index, val['ConnectionTime']])
+                  let connectCache = []
+                  connectList.forEach(function (val, index) {
+                    connectCache.push([index, val['ConnectionTime']])
                   })
-                  return d
+                  return connectCache
                 })()
               }
             ]
@@ -153,7 +149,6 @@
       },
 
       getDeviceInfo (env, device, mac) {
-        console.log(`env:${env},${device},${mac}`)
         this.formInline.connect.env = env
         this.formInline.connect.device = device
         this.formInline.connect.mac = mac

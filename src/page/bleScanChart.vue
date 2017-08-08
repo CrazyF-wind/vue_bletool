@@ -4,18 +4,18 @@
       <el-col :span="24">
         <!--表单-->
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
-          <el-form-item label="扫描时间（秒）">
-            <el-input v-model="formInline.scan.timer" placeholder="flag"></el-input>
-          </el-form-item>
+          <!--<el-form-item label="扫描时间（秒）">-->
+          <!--<el-input v-model="formInline.scan.timer" placeholder="flag"></el-input>-->
+          <!--</el-form-item>-->
           <scanMobile @getMobile="getMobileInfo"></scanMobile>
           <distance @getDistance="getDistanceInfo"></distance>
+          <!--<el-form-item label="测试次数">-->
+          <!--<el-input v-model="formInline.scan.testNum" placeholder="测试次数"></el-input>-->
+          <!--</el-form-item>-->
+          <deviceMac @getDevice="getDeviceInfo"></deviceMac>
           <el-form-item label="flag">
             <el-input v-model="formInline.scan.flag" placeholder="flag"></el-input>
           </el-form-item>
-          <el-form-item label="测试次数">
-            <el-input v-model="formInline.scan.testNum" placeholder="测试次数"></el-input>
-          </el-form-item>
-          <deviceMac @getDevice="getDeviceInfo"></deviceMac>
           <el-button type="primary" @click="queryscan">查询</el-button>
         </el-form>
       </el-col>
@@ -31,6 +31,7 @@
 <script type="text/ecmascript-6">
   import echarts from 'echarts'
   import qs from 'qs'
+  import cookie from '../util/cookie'
   import deviceMacComponent from '../components/deviceMac.vue'
   import scanMobileComponent from '../components/scanMobile.vue'
   import distanceComponent from '../components/distance.vue'
@@ -68,21 +69,26 @@
         macs: [],
         parameters: [],
         mobiles: [],
-        distances: []
+        distances: [],
+        userid: ''
       }
+    },
+    created () {
+      this.userid = cookie.getCookie('userid')
     },
     methods: {
       queryscan () {
         let params = {
-          'mac': '00:4d:32:07:92:09',          // 字母统一小写
-          'name': 'AM4',                       // 设备名称
-          'mi': 5,                             // 连接距离,单位:米
-          'mobile': 'Nexus 5',                 // 手机型号
-          'flag': '',                          // 连接标记说明
-          'userid': ''                         // 用户编号
+          'mi': Number(this.formInline.scan.distance),
+          'name': this.formInline.scan.device,
+          'mac': this.formInline.scan.mac,
+          'flag': this.formInline.scan.flag,
+          'mobile': this.formInline.scan.mobile,
+          'userid': this.userid
         }
         // 获取连接测试结果
-        this.$http.post('/ble_scan_query', qs.stringify(params)).then(response => {
+        this.$http.post('/ble_scan/query', qs.stringify(params)).then(response => {
+          let scanList = response.data.data
           const myChart = echarts.init(document.getElementById('ScanChart'))
           let option = {
             title: {
@@ -102,7 +108,7 @@
               zlevel: 1
             },
             legend: {
-              data: ['AM3S']
+              data: [scanList[0]['name']]
             },
             toolbox: {
               show: true,
@@ -122,22 +128,21 @@
             ],
             yAxis: [
               {
-                min: -100,
-                max: -40,
+//                min: -100,
+//                max: -40,
                 type: 'value',
                 scale: true
               }
             ],
             series: [
               {
-                name: 'AM3S',
+                name: scanList[0]['name'],
                 type: 'scatter',
                 large: true,
                 symbolSize: 10,
                 data: (function () {
                   let d = []
-                  let temp = response.data.data.scan_list
-                  temp.forEach(function (val, index) {
+                  scanList.forEach(function (val, index) {
                     d.push([index, val['RSSI']])
                   })
                   return d

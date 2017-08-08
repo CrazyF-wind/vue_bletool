@@ -16,15 +16,17 @@ import BleConnectChart from '@/page/bleConnectChart'
 import BleScanChart from '@/page/bleScanChart'
 import BtConnect from '@/page/btConnect'
 import Config from '@/page/config'
+import Labs from '@/labs/scroll'
 
 import Mock from './mock/mock'
 Mock.mockData()
 
 Vue.use(VueRouter)
 var $http = axios.create({
-  baseURL: 'http://10.0.0.10:3000/api/'
+  baseURL: 'http://10.0.0.10:3000/api/'            // 接口服务器地址
 })
 Vue.prototype.$http = $http
+Vue.prototype.$file = 'http://10.0.0.10:3000/'     // 文件下载地址
 Vue.use(ElementUI)
 
 let routes = [
@@ -42,7 +44,8 @@ let routes = [
       {path: '/bleConnectChart', component: BleConnectChart, name: '连接曲线', class: 'fa-area-chart'},
       {path: '/bleScanChart', component: BleScanChart, name: '扫描曲线', class: 'fa-area-chart'},
       {path: '/btConnect', component: BtConnect, name: '经典蓝牙', class: 'fa-bluetooth'},
-      {path: '/config', component: Config, name: '系统设置', class: 'fa-cog'}
+      {path: '/config', component: Config, name: '系统设置', class: 'fa-cog'},
+      {path: '/lab', component: Labs, name: '实验室', class: 'fa-cogs'}
     ]
   }, {
     path: '/register',

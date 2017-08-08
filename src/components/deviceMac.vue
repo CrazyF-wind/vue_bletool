@@ -51,7 +51,6 @@
     },
     created () {
       this.userid = cookie.getCookie('userid')
-      console.log(`created userId:${this.userid}`)
       /**
        * 获取扫描环境参数
        */
@@ -75,7 +74,6 @@
           'userid': this.userid,
           'flag': this.env
         }
-        console.log(`params:${JSON.stringify(params)}`)
         /**
          * 获取设备名称
          */
@@ -118,7 +116,6 @@
         })
       },
       getMacValue () {
-        console.log(`mac:${this.mac}`)
         // 在父组件中通过getDevice事件传递device和mac
         this.$emit('getDevice', this.env, this.device, this.mac)
       }

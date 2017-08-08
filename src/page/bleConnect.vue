@@ -93,7 +93,7 @@
         },
         tasks: {
           wait_plan: [],
-          finish_plan: [],
+          finish_plan: []
         },
         userid: ''
       }

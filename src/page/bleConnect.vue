@@ -37,10 +37,12 @@
     </el-row>
     <el-row>
       <el-col :span='12'>
-        <el-input type='textarea' :rows='5' v-model='wait_plan' placeholder='待处理..'></el-input>
+        <el-input type='textarea' :rows='5' v-model='tasks.wait_plan' disabled="disabled"
+                  placeholder='待处理..'></el-input>
       </el-col>
       <el-col :span='12'>
-        <el-input type='textarea' :rows='5' v-model='finish_plan' placeholder='已完成！'></el-input>
+        <el-input type='textarea' :rows='5' v-model='tasks.finish_plan' disabled="disabled"
+                  placeholder='已完成！'></el-input>
       </el-col>
     </el-row>
   </section>
@@ -84,16 +86,17 @@
           testNum: 0
         },
         task: {
-          beginTime: '',
-          endTime: '',
-          initNum: 1,
-          connectList: [],
-          percentage: 0,
-          successNum: 0
+          beginTime: '',      // 开始连接测试时间
+          endTime: '',        // 结束连接测试时间
+          initNum: 1,         // 测试进行次数
+          successNum: 0,      // 测试成功次数
+          connectList: '',    // 打印测试日志
+          percentage: 0       // 测试进度条
         },
         tasks: {
-          wait_plan: [],
-          finish_plan: []
+          wait_plan: '',      // 进队列，待测试任务
+          finish_plan: '',    // 出队列，已完成任务
+          currentNum: 1       // 当前任务次数
         },
         userid: ''
       }
@@ -103,16 +106,14 @@
     },
     methods: {
       beginConnect () {
-        this.task.connectList = []
+        // 初始化参数
+        this.task.connectList = ''
         this.task.beginTime = new Date().getTime()
-        this.connectResultQuery()
-      },
-      connectResultQuery () {
-        let that = this
-        if (this.task.initNum > this.formInline.connect.testNum) {
-          return
-        }
-        var params = {
+        this.task.endTime = ''
+        this.task.initNum = 1
+        this.task.successNum = 0
+
+        let params = {
           'mi': Number(this.formInline.connect.distance),
           'flag': this.formInline.connect.flag,
           'mobile': this.formInline.connect.mobile,
@@ -120,38 +121,64 @@
           'name': this.formInline.connect.device,
           'userid': this.userid
         }
+        let option = {
+          'initNum': 1,
+          'testNum': this.formInline.connect.testNum
+        }
+        this.connectResultQuery(params, option)
+      },
+      connectResultQuery (params, option) {
+        let that = this
+        console.log(`initNum:${option['initNum']},testNum:${option['testNum']}`)
+//        if (option['initNum'] > option['testNum']) {
+//          return
+//        }
         this.$http.post('http://192.168.82.53:8085/ConnectAutoTestPost', qs.stringify(params)).then(res => {
           let result = res.data
-          this.task.percentage = parseInt((this.task.initNum / this.formInline.connect.testNum) * 100)
+          this.task.percentage = parseInt((this.task.initNum / option['testNum']) * 100)
+
           if (result['result'] === 1) {
             this.task.connectList += '第' + this.task.initNum + '次连接,' + result['value'] + '\n'
             this.task.successNum += 1
           } else {
             this.task.connectList += '第' + this.task.initNum + '次连接,' + result['value'] + '\n'
           }
-          if (Number(this.task.initNum) === Number(this.formInline.connect.testNum) && result['value'] !== '蓝牙启动失败！') {
+          if (Number(this.task.initNum) === Number(option['testNum']) && result['value'] !== '蓝牙启动失败！') {
             this.task.endTime = new Date().getTime()
-            this.task.connectList += '完成！\n耗时：' + (this.task.endTime - this.task.beginTime) / 1000 + '秒，\n成功率：' + (this.task.successNum / this.formInline.connect.testNum) * 100 + '%\n'
+            this.task.connectList += '完成！\n耗时：' +
+              (this.task.endTime - this.task.beginTime) / 1000 +
+              '秒，\n成功率：' + (this.task.successNum / option['testNum']) * 100 + '%\n'
+            this.run()
+            return
           }
           if (result['value'] !== '蓝牙启动失败！') {
             this.task.initNum += 1
           }
-          document.getElementById('connectList').scrollTop = document.getElementById('connectList').scrollHeight
+
+          // document.getElementById('connectList').scrollTop = document.getElementById('connectList').scrollHeight
           setTimeout(function () {
-            that.connectResultQuery()
+            option = {
+              'initNum': that.task.initNum,
+              'testNum': option['testNum']
+            }
+            that.connectResultQuery(params, option)
           }, 1000)
         }).catch(err => {
-          this.$message.error(`${err.message}`, 'ERROR!')
+          this.$message({
+            showClose: true,
+            message: err.message,
+            type: 'error'
+          })
         })
       },
       stopConnect () {
         alert(JSON.stringify(this.formInline.connect))
       },
       clearConnect () {
-        this.task.connectList = []
+        this.task.connectList = ''
       },
       print () {
-        var params = {
+        let params = {
           'mi': Number(this.formInline.connect.distance),
           'flag': this.formInline.connect.flag,
           'mobile': this.formInline.connect.mobile,
@@ -164,7 +191,7 @@
         })
       },
       result () {
-        var params = {
+        let params = {
           'mi': Number(this.formInline.connect.distance),
           'flag': this.formInline.connect.flag,
           'mobile': this.formInline.connect.mobile,
@@ -180,13 +207,59 @@
         })
       },
       enqueue () {
-
+//        this.tasks.wait_plan += '设备名称：' + this.formInline.connect.device +
+//          ',mac：' + this.formInline.connect.mac +
+//          ',连接参数：' + this.formInline.connect.parameter +
+//          ',手机型号：' + this.formInline.connect.mobile +
+//          ',连接距离：' + this.formInline.connect.distance +
+//          ',flag:' + this.formInline.connect.flag +
+//          ',连接次数：' + this.formInline.connect.testNum + ';\n'
+        this.tasks.wait_plan += this.formInline.connect.device +
+          ',' + this.formInline.connect.mac +
+          ',' + this.formInline.connect.parameter +
+          ',' + this.formInline.connect.mobile +
+          ',' + this.formInline.connect.distance +
+          ',' + this.formInline.connect.flag +
+          ',' + this.formInline.connect.testNum + ';\n'
       },
       run () {
+        // 初始化参数
+        let tasksList = this.tasks.wait_plan
+        tasksList = tasksList.split(';\n')
+        let totalNum = tasksList.length               // 进队列后，待测试记录总数
+        console.log(`tasksList:${JSON.stringify(tasksList)}`)
 
+        if (totalNum > 1) {
+          // 初始化参数
+          this.task.endTime = ''
+          this.task.initNum = 1
+          this.task.successNum = 0
+          let taskParam = tasksList[0].split(',')
+          let totalTest = Number(taskParam[6])        // 一条测试任务内，连接测试总次数
+          let currentTest = 1                         // 执行测试任务次数
+
+          var params = {
+            'name': taskParam[0],
+            'mac': taskParam[1],
+            'mobile': taskParam[3],
+            'mi': taskParam[4],
+            'flag': taskParam[5],
+            'userid': this.userid
+          }
+          let option = {
+            'initNum': currentTest,
+            'testNum': totalTest
+          }
+          this.task.beginTime = new Date().getTime()
+          this.connectResultQuery(params, option)
+          console.log(`params:${JSON.stringify(params)},option:${JSON.stringify(option)}`)
+          this.tasks.wait_plan = (this.tasks.wait_plan).replace(tasksList[0] + ';\n', '')
+          this.tasks.finish_plan += tasksList[0] + ';\n'
+        }
       },
       clear () {
-
+        this.tasks.wait_plan = ''
+        this.tasks.finish_plan = ''
       },
       getDeviceInfo (env, device, mac) {
         this.formInline.connect.env = env

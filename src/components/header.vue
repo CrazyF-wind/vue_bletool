@@ -7,7 +7,7 @@
           <span class="header-lang is-active">{{user.name}}</span>
           <!--<span class="header-opacity">({{user.area}}/{{user.identity}})</span>-->
         </li>
-        <li><el-label @click="quitSystem">退出系统</el-label></li>
+        <li><label @click="quitSystem">退出系统</label></li>
       </ul>
     </header>
   </div>
@@ -25,9 +25,10 @@
     },
     created () {
       let username = cookie.getCookie('username')
-      this.user = {
-        'name': username
-      }
+      console.log(username)
+//      this.user = {
+//        'name': username
+//      }
     },
     methods: {
       quitSystem () {

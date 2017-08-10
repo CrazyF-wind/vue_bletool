@@ -7,12 +7,12 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const state = {
-  user: {}
+  username: {}
 }
 
 const mutations = {
   isLogin (state, user) {
-    state.user = user
+    state.username = user
   }
 }
 

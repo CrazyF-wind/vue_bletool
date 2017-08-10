@@ -30,7 +30,10 @@
       }
     },
     created () {
-      this.user = this.$store.state.user
+      console.log(JSON.stringify(this.$store.state.username))
+      this.user = {
+        'name': this.$store.state.username
+      }
     },
 //    beforeCreate () {
 //      if (this.$route.path === '/') {

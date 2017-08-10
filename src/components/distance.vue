@@ -20,7 +20,7 @@
   export default {
     data () {
       return {
-        distance: '',
+        distance: 1,
         distances: [],
         userid: ''
       }
@@ -35,7 +35,7 @@
         let distanceList = response.data.data
         let distanceCache = []
         distanceList.forEach(function (val) {
-          distanceCache.push({'label': val['distance'], 'value': val['distance']})
+          distanceCache.push({'label': Number(val['distance']), 'value': Number(val['distance'])})
         })
         this.distances = distanceCache
         this.distance = distanceList[0]['distance']

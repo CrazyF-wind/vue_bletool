@@ -50,7 +50,7 @@
         formInline: {
           env: {
             name: '',
-            flag: 1,
+            flag: '',
             timer: 10,
             distance: 1
           }
@@ -58,9 +58,8 @@
         form: {
           name: '',
           flag: '',
-          timer: 0,
-          distance: 1,
-          scan: ''
+          timer: 10,
+          distance: 1
         },
         flags: [],
         distances: [],
@@ -74,24 +73,26 @@
       /**
        * 获取扫描环境参数
        */
-      this.$http.post('/ble_env_query', qs.stringify({'userid': ''})).then(response => {
-        let envList = response.data.data.env_list
+      this.$http.post('/config/ble_env_query', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
+        let envList = response.data.data
         let env = []
-        envList.forEach(function (val, index) {
-          env.push({'label': val['flag'], 'value': index})
+        envList.forEach(function (val) {
+          env.push({'label': val['_id']['flag'], 'value': val['_id']['flag']})
         })
         this.flags = env
+        this.formInline.env.flag = envList[0]['_id']['flag']
       })
       /**
        * 获取距离参数
        */
-      this.$http.post('/ble_get_distance', qs.stringify({'userid': ''})).then(response => {
-        let distanceList = response.data.data.distance_list
-        let distance = []
-        distanceList.forEach(function (val, index) {
-          distance.push({'label': val, 'value': index})
+      this.$http.post('/config/ble_get_distance', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
+        let distanceList = response.data.data
+        let distanceCache = []
+        distanceList.forEach(function (val) {
+          distanceCache.push({'label': Number(val['distance']), 'value': Number(val['distance'])})
         })
-        this.distances = distance
+        this.distances = distanceCache
+        this.formInline.env.distance = distanceList[0]['distance']
       })
     },
     methods: {

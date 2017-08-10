@@ -2,8 +2,8 @@
   <div id="login-container">
     <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
       <span class="heading">用户登录</span>
-      <el-form-item label="用户名" prop="username">
-        <el-input v-model="ruleForm.username"></el-input>
+      <el-form-item label="用户名" prop="userName">
+        <el-input v-model="ruleForm.userName"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="pass">
         <el-input type="password" v-model="ruleForm.pass" auto-complete="off"></el-input>
@@ -30,55 +30,37 @@
         }
       }
       var validatePass = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入密码'))
-        } else {
-          if (this.ruleForm.checkPass !== '') {
-            this.$refs.ruleForm.validateField('checkPass')
-          }
-          callback()
+        if (!value) {
+          return callback(new Error('请输入密码'))
         }
       }
       return {
         ruleForm: {
           pass: '',
-          username: ''
+          userName: ''
         },
         rules: {
           pass: [
             {validator: validatePass, trigger: 'blur'}
           ],
-          username: [
+          userName: [
             {validator: checkUserName, trigger: 'blur'}
           ]
         }
       }
     },
     methods: {
-      submitForm (formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            this.$router.push('/main')
-          } else {
-            console.log('error submit!!')
-            return false
-          }
-        })
-      },
-      resetForm (formName) {
-        this.$refs[formName].resetFields()
-      },
       login () {
         let params = {
-          username: this.ruleForm.username,
+          username: this.ruleForm.userName,
           password: md5(this.ruleForm.pass)
         }
-        console.log(`params:${this.ruleForm.username}`)
+        console.log(`params:${this.ruleForm.userName}`)
         this.$http.post('/users/login', qs.stringify(params)).then(res => {
           console.log(`res.data:${JSON.stringify(res.data.data)}`)
           if (res.data.status.code === 1010100) {
             // 用户名存入store vuex
-            this.$store.commit('isLogin', this.ruleForm.username)
+            this.$store.commit('isLogin', this.ruleForm.userName)
             // 用户名存入cookie
             cookie.setCookie('username', res.data.data.username, 365)
             // 用户编号存入cookie
@@ -86,7 +68,11 @@
             // 进入主页
             this.$router.push('/main')
           } else {
-            this.$message.error(res.data.status.sub_msg, 'ERROR!')
+            this.$message({
+              showClose: true,
+              message: res.data.status.sub_msg,
+              type: 'error'
+            })
           }
         })
       },

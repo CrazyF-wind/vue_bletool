@@ -37,10 +37,10 @@
     </el-row>
     <el-row>
       <el-col :span='12'>
-        <el-input type='textarea' :rows='5' v-model='wait_plan' placeholder='待处理..'></el-input>
+        <el-input type='textarea' :rows='5' v-model='tasks.wait_plan' placeholder='待处理..'></el-input>
       </el-col>
       <el-col :span='12'>
-        <el-input type='textarea' :rows='5' v-model='finish_plan' placeholder='已完成！'></el-input>
+        <el-input type='textarea' :rows='5' v-model='tasks.finish_plan' placeholder='已完成！'></el-input>
       </el-col>
     </el-row>
   </section>
@@ -85,15 +85,12 @@
         },
         task: {
           beginTime: '',
-          scanList: []
+          scanList: ''
+        },
+        tasks: {
+
         },
         userid: '',
-        envs: [],
-        devices: [],
-        macs: [],
-        parameters: [],
-        mobiles: [],
-        distances: [],
         percentage: 0,
         macName: []
       }
@@ -116,7 +113,7 @@
     },
     methods: {
       begin_scan () {
-        this.task.scanList = []
+        this.task.scanList = ''
         var params = {
           'timer': this.formInline.scan.timer,
           'mi': Number(this.formInline.scan.distance),
@@ -186,6 +183,15 @@
         this.$http.post('/ble_scan/result_export', qs.stringify(params)).then(response => {
           window.location.href = this.$file + response.data.data
         })
+      },
+      enqueue () {
+
+      },
+      run () {
+
+      },
+      clear () {
+
       },
       getDeviceInfo (env, device, mac) {
         this.formInline.scan.env = env

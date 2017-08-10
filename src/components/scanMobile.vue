@@ -55,7 +55,6 @@
     },
     methods: {
       getParamter () {
-        console.log(`this.parameter:${(this.parameter).toString()}`)
         let params = this.parameter.split('/')
         let param = {
           'scan_interval': params[0],

@@ -38,6 +38,7 @@
   import cookie from '../util/cookie'
 
   export default {
+    props: ['type'],
     data () {
       return {
         env: '',
@@ -51,10 +52,11 @@
     },
     created () {
       this.userid = cookie.getCookie('userid')
+      console.log(`type:${this.type}`)
       /**
        * 获取扫描环境参数
        */
-      this.$http.post('/config/ble_env_query', qs.stringify({'userid': this.userid})).then(response => {
+      this.$http.post('/config/env_query', qs.stringify({'userid': this.userid, 'type': this.type})).then(response => {
         let envList = response.data.data
         let envCache = []
         envList.forEach(function (val) {
@@ -72,12 +74,13 @@
         this.mac = ''
         let params = {
           'userid': this.userid,
-          'flag': this.env
+          'flag': this.env,
+          'type': this.type
         }
         /**
          * 获取设备名称
          */
-        this.$http.post('/config/ble_name_query', qs.stringify(params)).then(response => {
+        this.$http.post('/config/name_query', qs.stringify(params)).then(response => {
           let deviceList = response.data.data
           let deviceCache = []
           deviceList.forEach(function (val) {
@@ -94,12 +97,13 @@
         let params = {
           'userid': this.userid,
           'flag': this.env,
-          'name': this.device
+          'name': this.device,
+          'type': this.type
         }
         /**
          * 获取设备mac
          */
-        this.$http.post('/config/ble_mac_query', qs.stringify(params)).then(response => {
+        this.$http.post('/config/mac_query', qs.stringify(params)).then(response => {
           let macList = response.data.data
           let macCache = []
           macList.forEach(function (val) {

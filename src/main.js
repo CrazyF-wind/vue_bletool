@@ -15,6 +15,7 @@ import BleScan from '@/page/bleScan'
 import BleConnectChart from '@/page/bleConnectChart'
 import BleScanChart from '@/page/bleScanChart'
 import BtConnect from '@/page/btConnect'
+import BtConnectChart from '@/page/btConnectChart'
 import Config from '@/page/config'
 import Labs from '@/labs/scroll'
 
@@ -23,10 +24,10 @@ Mock.mockData()
 
 Vue.use(VueRouter)
 var $http = axios.create({
-  baseURL: 'http://10.0.0.10:3000/api/'            // 接口服务器地址
+  baseURL: 'http://10.0.0.15:3000/api/'            // 接口服务器地址
 })
 Vue.prototype.$http = $http
-Vue.prototype.$file = 'http://10.0.0.10:3000/'     // 文件下载地址
+Vue.prototype.$file = 'http://10.0.0.15:3000/'     // 文件下载地址
 Vue.use(ElementUI)
 
 let routes = [
@@ -41,9 +42,10 @@ let routes = [
       {path: '/main', component: Main, name: '首页', class: 'fa-home'},
       {path: '/bleConnect', component: BleConnect, name: '连接测试', class: 'fa-bluetooth-b'},
       {path: '/bleScan', component: BleScan, name: '扫描测试', class: 'fa-bluetooth-b'},
+      {path: '/btConnect', component: BtConnect, name: '经典蓝牙', class: 'fa-bluetooth'},
       {path: '/bleConnectChart', component: BleConnectChart, name: '连接曲线', class: 'fa-area-chart'},
       {path: '/bleScanChart', component: BleScanChart, name: '扫描曲线', class: 'fa-area-chart'},
-      {path: '/btConnect', component: BtConnect, name: '经典蓝牙', class: 'fa-bluetooth'},
+      {path: '/btConnectChart', component: BtConnectChart, name: '经典蓝牙曲线', class: 'fa-area-chart'},
       {path: '/config', component: Config, name: '系统设置', class: 'fa-cog'},
       {path: '/lab', component: Labs, name: '实验室', class: 'fa-cogs'}
     ]

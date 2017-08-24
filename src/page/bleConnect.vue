@@ -4,7 +4,7 @@
       <el-col :span='24'>
         <!--表单-->
         <el-form :inline='true' :model='formInline' class='demo-form-inline'>
-          <deviceMac @getDevice='getDeviceInfo'></deviceMac>
+          <deviceMac @getDevice='getDeviceInfo' :type="type"></deviceMac>
           <connectMobile @getMobile='getMobileInfo'></connectMobile>
           <distance @getDistance='getDistanceInfo'></distance>
           <el-form-item label='flag'>
@@ -31,6 +31,8 @@
             <el-button type='primary' @click='enqueue'>入队</el-button>
             <el-button @click='run'>执行</el-button>
             <el-button @click='clear'>清空</el-button>
+            <el-button @click='recordList'>批量导出记录excel</el-button>
+            <el-button @click='resultList'>批量导出结论excel</el-button>
           </el-form-item>
         </el-form>
       </el-col>
@@ -95,10 +97,12 @@
         },
         tasks: {
           wait_plan: '',      // 进队列，待测试任务
+          wait_plan_print: '',      // 进队列，批量导出使用
           finish_plan: '',    // 出队列，已完成任务
           currentNum: 1       // 当前任务次数
         },
-        userid: ''
+        userid: '',
+        type: 1               // 1:ble设备，0:bt设备
       }
     },
     created () {
@@ -207,6 +211,7 @@
         })
       },
       enqueue () {
+        // 前端展示使用
 //        this.tasks.wait_plan += '设备名称：' + this.formInline.connect.device +
 //          ',mac：' + this.formInline.connect.mac +
 //          ',连接参数：' + this.formInline.connect.parameter +
@@ -214,6 +219,8 @@
 //          ',连接距离：' + this.formInline.connect.distance +
 //          ',flag:' + this.formInline.connect.flag +
 //          ',连接次数：' + this.formInline.connect.testNum + ';\n'
+
+        // 执行批量连接使用
         this.tasks.wait_plan += this.formInline.connect.device +
           ',' + this.formInline.connect.mac +
           ',' + this.formInline.connect.parameter +
@@ -221,6 +228,16 @@
           ',' + this.formInline.connect.distance +
           ',' + this.formInline.connect.flag +
           ',' + this.formInline.connect.testNum + ';\n'
+
+        // 导出excel使用
+        this.tasks.wait_plan_print += '{' +
+          'name:' + '\'' + this.formInline.connect.device + '\'' +
+          ',mac:' + '\'' + this.formInline.connect.mac + '\'' +
+          ',mobile:' + '\'' + this.formInline.connect.mobile + '\'' +
+          ',mi:' + '\'' + this.formInline.connect.distance + '\'' +
+          ',flag:' + '\'' + this.formInline.connect.flag + '\'' +
+          ',connect_num:' + '\'' + this.formInline.connect.testNum + '\'' +
+          ',userid:' + '\'' + this.userid + '\'' + '},'
       },
       run () {
         // 初始化参数
@@ -260,6 +277,25 @@
       clear () {
         this.tasks.wait_plan = ''
         this.tasks.finish_plan = ''
+        this.tasks.wait_plan_print = ''
+      },
+      resultList () {
+        let resultList = this.tasks.wait_plan_print
+        resultList = resultList.substring(0, resultList.length - 1)
+        console.log(JSON.stringify({'params': '[' + resultList + ']'}))
+        this.$http.post('/ble_connect/result_list_export', qs.stringify({'params': '[' + resultList + ']'})).then(response => {
+          console.log(response.data.data)
+          window.location.href = this.$file + response.data.data
+        })
+      },
+      recordList () {
+        let recordList = this.tasks.wait_plan_print
+        recordList = recordList.substring(0, recordList.length - 1)
+        console.log(JSON.stringify({'params': '[' + recordList + ']'}))
+        this.$http.post('/ble_connect/query_list_export', qs.stringify({'params': '[' + recordList + ']'})).then(response => {
+          console.log(response.data.data)
+          window.location.href = this.$file + response.data.data
+        })
       },
       getDeviceInfo (env, device, mac) {
         this.formInline.connect.env = env

@@ -7,33 +7,18 @@
           <el-form-item label="新建测试环境">
             <el-input v-model="formInline.env.name" placeholder="新建测试环境"></el-input>
           </el-form-item>
-          <el-form-item label="测试环境">
-            <el-select v-model="formInline.env.flag" placeholder="请选择">
-              <el-option
-                v-for="item in flags"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
-          </el-form-item>
           <el-form-item label="扫描时间（秒）">
             <el-input v-model="formInline.env.timer" type="number" placeholder="扫描时间"></el-input>
-          </el-form-item>
-          <el-form-item label="扫描距离（米）">
-            <el-select v-model="formInline.env.distance" placeholder="请选择">
-              <el-option
-                v-for="item in distances"
-                :label="item.label"
-                :value="item.value"
-                :key="item.value">
-              </el-option>
-            </el-select>
           </el-form-item>
           <el-button type="primary" @click="onScan">扫描</el-button>
           <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage"
                        style="margin-bottom: 22px;"></el-progress>
           <el-input type="textarea" :rows="15" v-model="scan"></el-input>
+        </el-form>
+      </el-col>
+      <el-col>
+        <el-form :inline="true" :model="formInline" class="demo-form-inline">
+          <deviceMac @getDevice='getDeviceInfo' :type="type" style="margin-top: 22px;"></deviceMac>
         </el-form>
       </el-col>
     </el-row>
@@ -43,57 +28,37 @@
 <script type="text/ecmascript-6">
   import qs from 'qs'
   import cookie from '../util/cookie'
+  import deviceMacComponent from '../components/deviceMac.vue'
 
   export default {
+    components: {
+      deviceMac: deviceMacComponent
+    },
     data () {
       return {
         formInline: {
           env: {
             name: '',
-            flag: '',
-            timer: 10,
-            distance: 1
+            device: '',
+            mac: '',
+            timer: 10
           }
         },
         form: {
           name: '',
-          flag: '',
-          timer: 10,
-          distance: 1
+          device: '',
+          mac: '',
+          timer: 10
         },
-        flags: [],
-        distances: [],
         scan: '',
         userid: '',
         percentage: 0,
-        beginTime: 0
+        beginTime: 0,
+        type: 1               // 1:ble设备，0:bt设备
       }
     },
     created () {
-      /**
-       * 获取扫描环境参数
-       */
-      this.$http.post('/config/ble_env_query', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
-        let envList = response.data.data
-        let env = []
-        envList.forEach(function (val) {
-          env.push({'label': val['_id']['flag'], 'value': val['_id']['flag']})
-        })
-        this.flags = env
-        this.formInline.env.flag = envList[0]['_id']['flag']
-      })
-      /**
-       * 获取距离参数
-       */
-      this.$http.post('/config/ble_get_distance', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
-        let distanceList = response.data.data
-        let distanceCache = []
-        distanceList.forEach(function (val) {
-          distanceCache.push({'label': Number(val['distance']), 'value': Number(val['distance'])})
-        })
-        this.distances = distanceCache
-        this.formInline.env.distance = distanceList[0]['distance']
-      })
+      this.userid = cookie.getCookie('userid')
     },
     methods: {
       onScan () {
@@ -103,8 +68,7 @@
         console.log(this.userid)
         let param = {
           'userid': this.userid,
-          'flag': this.formInline.env.flag,
-          'mi': this.formInline.env.distance,
+          'flag': this.formInline.env.name,
           'timer': this.formInline.env.timer
         }
         console.log(param)
@@ -121,14 +85,19 @@
       },
       queryOnce () {
         let change = new Date().getTime() - this.beginTime
+        let param = {
+          'userid': this.userid,
+          'type': this.type
+        }
         if (change > Number(this.formInline.env.timer) * 1000) {
           this.percentage = 100
-          this.$http.post('/ble_device_query', qs.stringify({'userid': '', 'flag': ''})).then(response => {
+          this.$http.post('/config/device_query', qs.stringify(param)).then(response => {
             this.scan = JSON.stringify(response.data)
-            let scanList = response.data.data.device_list
+            console.log('queryonce:' + this.scan)
+            let scanList = response.data.data
             let scan = ''
             scanList.forEach(function (val, index) {
-              scan += `${index + 1}.mac:${val['mac']},name:${val['name']}\n`
+              scan += `${index + 1}.mac:${val['_id']['mac']},name:${val['_id']['name']}\n`
             })
             this.scan = scan
           })
@@ -140,18 +109,12 @@
             that.queryOnce()
           }, 100)
         }
+      },
+      getDeviceInfo (env, device, mac) {
+        this.formInline.env.name = env
+        this.formInline.env.device = device
+        this.formInline.env.mac = mac
       }
     }
   }
 </script>
-<style>
-  .el-pagination {
-    text-align: center;
-    margin-top: 30px;
-  }
-
-  .el-message-box__btns .cancel {
-    float: right;
-    margin-left: 10px;
-  }
-</style>

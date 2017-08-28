@@ -1,6 +1,6 @@
 <template>
   <div style="float:left;">
-    <el-form-item label="连接参数">
+    <el-form-item label="扫描参数">
       <el-select v-model="parameter" @change="getParamter" placeholder="请选择">
         <el-option
           v-for="item in parameters"

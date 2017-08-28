@@ -13,10 +13,11 @@
             <el-input v-model='formInline.scan.flag' placeholder='flag'></el-input>
           </el-form-item>
           <el-button type='primary' @click='begin_scan'>运行</el-button>
+          <el-button @click='clearScan'>清空</el-button>
           <el-progress :text-inside='true' :stroke-width='18' :percentage='percentage'
                        style='margin-bottom: 22px;'></el-progress>
           <el-input type='textarea' :rows='15' v-model='task.scanList' style='margin-bottom: 22px;'></el-input>
-          <deviceMac @getDevice='getDeviceInfo'></deviceMac>
+          <deviceMac @getDevice='getDeviceInfo' :type="type"></deviceMac>
           <el-form-item>
             <el-button @click='print'>导出记录excel</el-button>
             <el-button @click='result'>导出结论excel</el-button>
@@ -31,6 +32,8 @@
             <el-button type='primary' @click='enqueue'>入队</el-button>
             <el-button @click='run'>执行</el-button>
             <el-button @click='clear'>清空</el-button>
+            <el-button @click='recordList'>批量导出记录excel</el-button>
+            <el-button @click='resultList'>批量导出结论excel</el-button>
           </el-form-item>
         </el-form>
       </el-col>
@@ -88,11 +91,14 @@
           scanList: ''
         },
         tasks: {
-
+          wait_plan: '',
+          wait_plan_excel: '',      // 批量导出execl使用
+          finish_plan: ''
         },
         userid: '',
-        percentage: 0,
-        macName: []
+        type: 1,                    // 1:ble设备，0:bt设备
+        percentage: 0,              // 单次测试进度条
+        macName: []                 // 设备mac与名称对应列表
       }
     },
     created () {
@@ -100,8 +106,9 @@
       /**
        * 获取该用户下所有设备信息
        */
-      this.$http.post('/config/ble_device_query', qs.stringify({
-        'userid': this.userid
+      this.$http.post('/config/device_query', qs.stringify({
+        'userid': this.userid,
+        'type': this.type
       })).then(response => {
         let deviceList = response.data.data
         let deviceCache = []
@@ -126,17 +133,27 @@
         this.$http.post('http://192.168.82.53:8085/ScanAutoTestPost', qs.stringify(params)).then(res => {
           console.log(res)
         }).catch(err => {
-          this.$message.error(`${err.message}`, 'ERROR!')
+          this.$message({
+            showClose: true,
+            message: err.message,
+            type: 'error'
+          })
         })
         this.task.beginTime = new Date().getTime()
         this.getScanList()
       },
+      clearScan () {
+        this.task.scanList = ''
+      },
       getScanList () {
         let that = this
         let nowTime = Number(new Date().getTime() - this.task.beginTime)
+        console.log('nowTime:' + nowTime)
+        console.log('(Number(this.formInline.scan.timer) * 1000):' + (Number(this.formInline.scan.timer) * 1000))
         if (nowTime > (Number(this.formInline.scan.timer) * 1000)) {
           this.percentage = 100
-          this.task.scanList += '100% 完成！'
+          this.task.scanList += '100% 完成！\n'
+          this.run()
           return
         } else {
           let params = {
@@ -153,7 +170,11 @@
               that.getScanList()
             }, 1000)
           }).catch(err => {
-            this.$message.error(`${err.message}`, `ERROR!`)
+            this.$message({
+              showClose: true,
+              message: err.message,
+              type: 'error'
+            })
           })
         }
       },
@@ -185,13 +206,78 @@
         })
       },
       enqueue () {
+        // 前端展示、批量导出excel使用
+        this.tasks.wait_plan_excel += '{name:' + '\'' + this.formInline.scan.device + '\'' +
+          ',mac:' + '\'' + this.formInline.scan.mac + '\'' +
+          ',mobile:' + '\'' + this.formInline.scan.mobile + '\'' +
+          ',mi:' + '\'' + this.formInline.scan.distance + '\'' +
+          ',flag:' + '\'' + this.formInline.scan.flag + '\'' +
+          ',userid:' + '\'' + this.userid + '\'' + '},'
 
+        // 批量执行扫描使用
+        this.tasks.wait_plan += this.formInline.scan.timer +
+          ',' + this.formInline.scan.distance +
+          ',' + this.formInline.scan.flag +
+          ',' + this.formInline.scan.mobile +
+          ',' + this.userid + ';\n'
       },
       run () {
+        let tasksList = this.tasks.wait_plan
+        tasksList = tasksList.split(';\n')
+        let totalNum = tasksList.length               // 进队列后，待测试记录总数
 
+        if (totalNum > 1) {
+          let tasksParam = tasksList[0].split(',')
+          let option = {
+            'timer': tasksParam[0],
+            'mi': tasksParam[1],
+            'flag': tasksParam[2],
+            'mobile': tasksParam[3],
+            'macName': JSON.stringify(this.macName),
+            'userid': tasksParam[4]
+          }
+          /**
+           * 扫描测试
+           */
+          this.$http.post('http://192.168.82.53:8085/ScanAutoTestPost', qs.stringify(option)).then(response => {
+            let resTpye = (response['data'] === 'succeed') ? 'info' : 'error'
+            console.log('response：' + JSON.stringify(response['data']))
+            this.$message({
+              showClose: true,
+              message: response['data'],
+              type: resTpye
+            })
+          })
+          this.task.beginTime = new Date().getTime()
+          this.getScanList()
+          this.tasks.wait_plan = (this.tasks.wait_plan).replace(tasksList[0] + ';\n', '')
+          this.tasks.finish_plan += tasksList[0] + ';\n'
+        }
       },
       clear () {
-
+        // 初始化
+        this.tasks.wait_plan = ''
+        this.tasks.wait_plan_excel = ''
+        this.tasks.finish_plan = ''
+      },
+      resultList () {
+        let resultList = this.tasks.wait_plan_excel
+        resultList = resultList.substring(0, resultList.length - 1)
+        // this.tasks.wait_plan_excel = '[' + resultList + ']'
+        console.log(`wait_plan:${JSON.stringify({'params': '[' + resultList + ']'})}`)
+        this.$http.post('/ble_scan/result_list_export', qs.stringify({'params': '[' + resultList + ']'})).then(response => {
+          console.log(`result:${response.data.data}`)
+          window.location.href = this.$file + response.data.data
+        })
+      },
+      recordList () {
+        let recordList = this.tasks.wait_plan_excel
+        recordList = recordList.substring(0, recordList.length - 1)
+        console.log(`wait_plan_print:${JSON.stringify({'params': '[' + recordList + ']'})}`)
+        this.$http.post('/ble_scan/query_list_export', qs.stringify({'params': '[' + recordList + ']'})).then(response => {
+          console.log(`query:${response.data.data}`)
+          window.location.href = this.$file + response.data.data
+        })
       },
       getDeviceInfo (env, device, mac) {
         this.formInline.scan.env = env

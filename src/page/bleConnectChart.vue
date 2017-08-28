@@ -16,6 +16,21 @@
       <el-col :span="24" class="chart">
         <div id="ConnectChart" style="height: 650px">图表加载失败</div>
       </el-col>
+      <el-col :span="24">
+        <el-form :inline="true" class="demo-form-inline">
+          <el-form-item label='多任务测试' style='margin-top: 22px;'>
+            <el-button type='primary' @click='enqueue'>入队</el-button>
+            <el-button @click='clear'>清空</el-button>
+            <el-button @click='queryConnectList'>批量查询</el-button>
+          </el-form-item>
+        </el-form>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span='24'>
+        <el-input type='textarea' :rows='5' v-model='tasks.wait_plan' disabled="disabled"
+                  placeholder='多任务查询'></el-input>
+      </el-col>
     </el-row>
   </section>
 </template>
@@ -45,7 +60,7 @@
             mobile: '',
             distance: 1,
             flag: '',
-            testNum: ''
+            testNum: 1
           }
         },
         form: {
@@ -56,7 +71,7 @@
           mobile: '',
           distance: 1,
           flag: '',
-          testNum: ''
+          testNum: 1
         },
         envs: [],
         devices: [],
@@ -64,6 +79,9 @@
         parameters: [],
         mobiles: [],
         distances: [],
+        tasks: {
+          wait_plan: ''            // 进队列，查询条件
+        },
         userid: ''
       }
     },
@@ -83,71 +101,101 @@
         // 获取连接测试结果
         this.$http.post('/ble_connect/query', qs.stringify(params)).then(response => {
           let connectList = response.data.data
-          const myChart = echarts.init(document.getElementById('ConnectChart'))
-          let option = {
-            title: {
-              text: '连接测试曲线'
-            },
-            tooltip: {
-              trigger: 'axis',
-              showDelay: 0,
-              axisPointer: {
-                show: true,
-                type: 'cross',
-                lineStyle: {
-                  type: 'dashed',
-                  width: 1
-                }
-              },
-              zlevel: 1
-            },
-            legend: {
-              data: [connectList[0]['name']]
-            },
-            toolbox: {
-              show: true,
-              feature: {
-                mark: {show: true},
-                dataZoom: {show: true},
-                dataView: {show: true, readOnly: false},
-                restore: {show: true},
-                saveAsImage: {show: true}
-              }
-            },
-            xAxis: [
-              {
-                type: 'value',
-                scale: true
-              }
-            ],
-            yAxis: [
-              {
-//                min: 0,
-//                max: 2500,
-                type: 'value',
-                scale: true
-              }
-            ],
-            series: [
-              {
-                name: connectList[0]['name'],
-                type: 'scatter',
-                large: true,
-                symbolSize: 10,
-                data: (function () {
-                  let connectCache = []
-                  connectList.forEach(function (val, index) {
-                    connectCache.push([index, val['ConnectionTime']])
-                  })
-                  return connectCache
-                })()
-              }
-            ]
-          }
-          myChart.setOption(option)
+          this.makeChart(connectList)
         })
       },
-
+      queryConnectList () {
+        let recordList = this.tasks.wait_plan_print
+        recordList = recordList.substring(0, recordList.length - 1)
+        console.log(JSON.stringify({'params': '[' + recordList + ']'}))
+        this.$http.post('/ble_connect/query_list', qs.stringify({'params': '[' + recordList + ']'})).then(response => {
+          console.log(response.data.data)
+//          window.location.href = this.$file + response.data.data
+          this.makeChart(response.data.data)
+        })
+      },
+      makeChart (data) {
+        // 初始化
+        let titleList = []
+        let connectList = []
+        data.forEach(function (val, index) {
+          titleList.push(index + '.' + val[0]['name'])
+          connectList.push(
+            {
+              name: index + '.' + val[0]['name'],
+              type: 'scatter',
+              large: true,
+              symbolSize: 10,
+              data: (function () {
+                let connectCache = []
+                val.forEach(function (val, index) {
+                  connectCache.push([index, val['ConnectionTime']])
+                })
+                return connectCache
+              })()
+            }
+          )
+        })
+        const myChart = echarts.init(document.getElementById('ConnectChart'))
+        let option = {
+          title: {
+            text: '连接测试曲线'
+          },
+          tooltip: {
+            trigger: 'axis',
+            showDelay: 0,
+            axisPointer: {
+              show: true,
+              type: 'cross',
+              lineStyle: {
+                type: 'dashed',
+                width: 1
+              }
+            },
+            zlevel: 1
+          },
+          legend: {
+            data: titleList
+          },
+          toolbox: {
+            show: true,
+            feature: {
+              mark: {show: true},
+              dataZoom: {show: true},
+              dataView: {show: true, readOnly: false},
+              restore: {show: true},
+              saveAsImage: {show: true}
+            }
+          },
+          xAxis: [
+            {
+              type: 'value',
+              scale: true
+            }
+          ],
+          yAxis: [
+            {
+              type: 'value',
+              scale: true
+            }
+          ],
+          series: connectList
+        }
+        myChart.setOption(option)
+      },
+      enqueue () {
+        // 执行批量连接使用
+        this.tasks.wait_plan += this.formInline.connect.device +
+          ',' + this.formInline.connect.mac +
+          ',' + this.formInline.connect.parameter +
+          ',' + this.formInline.connect.mobile +
+          ',' + this.formInline.connect.distance +
+          ',' + this.formInline.connect.flag +
+          ',' + this.formInline.connect.testNum + ';\n'
+      },
+      clear () {
+        this.tasks.wait_plan = ''
+      },
       getDeviceInfo (env, device, mac) {
         this.formInline.connect.env = env
         this.formInline.connect.device = device

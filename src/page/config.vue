@@ -206,11 +206,9 @@
       },
       upDongle () {
         this.$http.post('http://192.168.82.53:8085/UpBluetooth', qs.stringify({})).then(response => {
-          let status = response.data.status
-          let type = (status['code'] === 1) ? 'success' : 'info'
           this.$message({
-            message: status['sub_msg'],
-            type: type
+            message: response.data,
+            type: 'info'
           })
           this.getConfig()
         }).catch(err => {
@@ -223,11 +221,9 @@
       },
       downDongle () {
         this.$http.post('http://192.168.82.53:8085/DownBluetooth', qs.stringify({})).then(response => {
-          let status = response.data.status
-          let type = (status['code'] === 1) ? 'success' : 'info'
           this.$message({
-            message: status['sub_msg'],
-            type: type
+            message: response.data,
+            type: 'info'
           })
           this.getConfig()
         }).catch(err => {

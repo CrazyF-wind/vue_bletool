@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="float:left;">
     <el-form-item label="连接参数">
       <el-select v-model="parameter" @change="getParamter" placeholder="请选择">
         <el-option

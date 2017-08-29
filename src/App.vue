@@ -22,6 +22,7 @@
 
 <script type="text/ecmascript-6">
   import header from './components/header.vue'
+  import cookie from './util/cookie'
 
   export default {
     data () {
@@ -32,7 +33,8 @@
     created () {
       console.log(JSON.stringify(this.$store.state.username))
       this.user = {
-        'name': this.$store.state.username
+//        'name': this.$store.state.username
+        'name': cookie.getCookie('username')
       }
     },
 //    beforeCreate () {

@@ -140,12 +140,18 @@
           })
         })
         this.task.beginTime = new Date().getTime()
-        this.getScanList()
+        let taskParam = {
+          'mi': Number(this.formInline.scan.distance),
+          'flag': this.formInline.scan.flag,
+          'mobile': this.formInline.scan.mobile,
+          'userid': this.userid
+        }
+        this.getScanList(taskParam)
       },
       clearScan () {
         this.task.scanList = ''
       },
-      getScanList () {
+      getScanList (taskParam) {
         let that = this
         let nowTime = Number(new Date().getTime() - this.task.beginTime)
         console.log('nowTime:' + nowTime)
@@ -156,18 +162,12 @@
           this.run()
           return
         } else {
-          let params = {
-            'mi': Number(this.formInline.scan.distance),
-            'flag': this.formInline.scan.flag,
-            'mobile': this.formInline.scan.mobile,
-            'userid': this.userid
-          }
-          this.$http.post('/ble_scan/query_once', qs.stringify(params)).then(response => {
-            let result = response.data.data[0]
-            this.task.scanList += '设备名称：' + result['name'] + ',mac:' + result['mac'] + ',扫描距离：' + result['mi'] + '米,RSSI:' + result['RSSI'] + ',记录时间：' + result['datetime'] + ';\n'
+          this.$http.post('/ble_scan/query_once', qs.stringify(taskParam)).then(response => {
+            let result = response.data.data
+            this.task.scanList += '设备名称：' + result[0]['name'] + ',mac:' + result[0]['mac'] + ',扫描距离：' + result[0]['mi'] + '米,RSSI:' + result[0]['RSSI'] + ',记录时间：' + result[0]['datetime'] + ';\n'
             this.percentage = parseInt((nowTime / Number(this.formInline.scan.timer)) / 10)
             setTimeout(function () {
-              that.getScanList()
+              that.getScanList(taskParam)
             }, 1000)
           }).catch(err => {
             this.$message({
@@ -240,16 +240,28 @@
            * 扫描测试
            */
           this.$http.post('http://192.168.82.53:8085/ScanAutoTestPost', qs.stringify(option)).then(response => {
-            let resTpye = (response['data'] === 'succeed') ? 'info' : 'error'
+            let resTpye = (response['data'] === 'succeed') ? 'success' : 'info'
             console.log('response：' + JSON.stringify(response['data']))
             this.$message({
               showClose: true,
               message: response['data'],
               type: resTpye
             })
+          }).catch(err => {
+            this.$message({
+              showClose: true,
+              message: err.message,
+              type: 'error'
+            })
           })
           this.task.beginTime = new Date().getTime()
-          this.getScanList()
+          let taskParam = {
+            'mi': Number(tasksParam[1]),
+            'flag': tasksParam[2],
+            'mobile': tasksParam[3],
+            'userid': tasksParam[4]
+          }
+          this.getScanList(taskParam)
           this.tasks.wait_plan = (this.tasks.wait_plan).replace(tasksList[0] + ';\n', '')
           this.tasks.finish_plan += tasksList[0] + ';\n'
         }

@@ -107,7 +107,7 @@
           this.percentage = parseInt((change / 1000) / Number(this.formInline.env.timer) * 100)
           setTimeout(function () {
             that.queryOnce()
-          }, 100)
+          }, 1000)
         }
       },
       getDeviceInfo (env, device, mac) {

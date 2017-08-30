@@ -96,6 +96,7 @@
           finish_plan: ''
         },
         userid: '',
+        url: '',
         type: 1,                    // 1:ble设备，0:bt设备
         percentage: 0,              // 单次测试进度条
         macName: []                 // 设备mac与名称对应列表
@@ -117,6 +118,11 @@
         })
         this.macName = deviceCache
       })
+
+      this.$http.post('/config/get_url', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
+        let url = response.data.data
+        this.url = url['host'] + ':' + url['port']
+      })
     },
     methods: {
       begin_scan () {
@@ -130,7 +136,8 @@
           'parameter': this.formInline.scan.parameter,
           'userid': this.userid
         }
-        this.$http.post('http://192.168.82.53:8085/ScanAutoTestPost', qs.stringify(params)).then(res => {
+        console.log('url:' + this.url)
+        this.$http.post('http://' + this.url + '/ScanAutoTestPost', qs.stringify(params)).then(res => {
           console.log(res)
         }).catch(err => {
           this.$message({

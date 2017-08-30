@@ -139,6 +139,7 @@
           connect_min_interval: '',
           connect_max_interval: ''
         },
+        url: '',
         hciLog: '',
         userid: ''
       }
@@ -160,6 +161,13 @@
           type: 'error'
         })
       })
+
+      this.$http.post('/config/get_url', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
+        let url = response.data.data
+        this.url = url['host'] + ':' + url['port']
+      })
+
+      this.getConfig()
     },
     methods: {
       addConfig () {
@@ -205,7 +213,7 @@
         })
       },
       upDongle () {
-        this.$http.post('http://192.168.82.53:8085/UpBluetooth', qs.stringify({})).then(response => {
+        this.$http.post('http://' + this.url + '/UpBluetooth', qs.stringify({})).then(response => {
           this.$message({
             message: response.data,
             type: 'info'
@@ -220,7 +228,7 @@
         })
       },
       downDongle () {
-        this.$http.post('http://192.168.82.53:8085/DownBluetooth', qs.stringify({})).then(response => {
+        this.$http.post('http://' + this.url + '/DownBluetooth', qs.stringify({})).then(response => {
           this.$message({
             message: response.data,
             type: 'info'
@@ -235,8 +243,15 @@
         })
       },
       getConfig () {
-        this.$http.post('http://192.168.82.53:8085/GetConfig', qs.stringify({})).then(response => {
+        this.$http.post('http://' + this.url + '/GetConfig', qs.stringify({})).then(response => {
           this.hciLog = response.data
+          if ((response.data).indexOf('UP') > 0) {
+            this.formInline.config.state = '蓝牙启动'
+          } else if ((response.data).indexOf('DOWN') > 0) {
+            this.formInline.config.state = '蓝牙关闭'
+          } else {
+            this.formInline.config.state = '蓝牙状态未知'
+          }
         }).catch(err => {
           this.$message({
             showClose: true,

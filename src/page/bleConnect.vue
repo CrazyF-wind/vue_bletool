@@ -52,7 +52,7 @@
 
 <script type='text/ecmascript-6'>
   import qs from 'qs'
-  import Cookie from '../util/cookie'
+  import cookie from '../util/cookie'
   import deviceMacComponent from '../components/deviceMac.vue'
   import connectMobileComponent from '../components/connectMobile.vue'
   import distanceComponent from '../components/distance.vue'
@@ -101,12 +101,18 @@
           finish_plan: '',    // 出队列，已完成任务
           currentNum: 1       // 当前任务次数
         },
+        url: '',
         userid: '',
         type: 1               // 1:ble设备，0:bt设备
       }
     },
     created () {
-      this.userid = Cookie.getCookie('userid')
+      this.userid = cookie.getCookie('userid')
+
+      this.$http.post('/config/get_url', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
+        let url = response.data.data
+        this.url = url['host'] + ':' + url['port']
+      })
     },
     methods: {
       beginConnect () {
@@ -137,7 +143,7 @@
 //        if (option['initNum'] > option['testNum']) {
 //          return
 //        }
-        this.$http.post('http://192.168.82.53:8085/ConnectAutoTestPost', qs.stringify(params)).then(res => {
+        this.$http.post('http://' + this.url + '/ConnectAutoTestPost', qs.stringify(params)).then(res => {
           let result = res.data
           this.task.percentage = parseInt((this.task.initNum / option['testNum']) * 100)
 

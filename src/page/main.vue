@@ -54,11 +54,17 @@
         userid: '',
         percentage: 0,
         beginTime: 0,
+        url: '',
         type: 1               // 1:ble设备，0:bt设备
       }
     },
     created () {
       this.userid = cookie.getCookie('userid')
+
+      this.$http.post('/config/get_url', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
+        let url = response.data.data
+        this.url = url['host'] + ':' + url['port']
+      })
     },
     methods: {
       onScan () {
@@ -73,7 +79,7 @@
         }
         console.log(param)
         // 获取扫描情况
-        this.$http.post('http://192.168.82.53:8085/DeviceInit', qs.stringify(param)).then(response => {
+        this.$http.post('http://' + this.url + '/DeviceInit', qs.stringify(param)).then(response => {
           let that = this     // 把this继承过来以后重新封装一下，否则queryOnce无法在setTimeout中使用
           setTimeout(function () {
             that.$message.info(`${JSON.stringify(response.data)}`, 'INFO!')

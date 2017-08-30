@@ -55,9 +55,7 @@
           username: this.ruleForm.userName,
           password: md5(this.ruleForm.pass)
         }
-        console.log(`params:${this.ruleForm.userName}`)
         this.$http.post('/users/login', qs.stringify(params)).then(res => {
-          console.log(`res.data:${JSON.stringify(res.data.data)}`)
           if (res.data.status.code === 1010100) {
             // 用户名存入store vuex
             this.$store.commit('isLogin', this.ruleForm.userName)

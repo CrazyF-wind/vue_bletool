@@ -52,7 +52,6 @@
     },
     created () {
       this.userid = cookie.getCookie('userid')
-      console.log(`type:${this.type}`)
       /**
        * 获取扫描环境参数
        */

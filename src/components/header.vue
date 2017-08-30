@@ -25,7 +25,6 @@
     },
     created () {
       let username = cookie.getCookie('username')
-      console.log(username)
 //      this.user = {
 //        'name': username
 //      }

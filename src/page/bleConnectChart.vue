@@ -4,7 +4,7 @@
       <el-col :span="24">
         <!--表单-->
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
-          <deviceMac @getDevice="getDeviceInfo"></deviceMac>
+          <deviceMac @getDevice="getDeviceInfo" :type="type"></deviceMac>
           <connectMobile @getMobile="getMobileInfo"></connectMobile>
           <distance @getDistance="getDistanceInfo"></distance>
           <el-form-item label="flag">
@@ -80,8 +80,10 @@
         mobiles: [],
         distances: [],
         tasks: {
-          wait_plan: ''            // 进队列，查询条件
+          wait_plan: '',            // 进队列，查询条件
+          wait_plan_print: ''
         },
+        type: 1,
         userid: ''
       }
     },
@@ -100,7 +102,8 @@
         }
         // 获取连接测试结果
         this.$http.post('/ble_connect/query', qs.stringify(params)).then(response => {
-          let connectList = response.data.data
+          let connectList = []
+          connectList.push(response.data.data)
           this.makeChart(connectList)
         })
       },
@@ -184,7 +187,7 @@
         myChart.setOption(option)
       },
       enqueue () {
-        // 执行批量连接使用
+        // 显示使用
         this.tasks.wait_plan += this.formInline.connect.device +
           ',' + this.formInline.connect.mac +
           ',' + this.formInline.connect.parameter +
@@ -192,9 +195,20 @@
           ',' + this.formInline.connect.distance +
           ',' + this.formInline.connect.flag +
           ',' + this.formInline.connect.testNum + ';\n'
+
+        // 执行批量连接使用
+        this.tasks.wait_plan_print += '{' +
+          'name:' + '\'' + this.formInline.connect.device + '\'' +
+          ',mac:' + '\'' + this.formInline.connect.mac + '\'' +
+          ',mobile:' + '\'' + this.formInline.connect.mobile + '\'' +
+          ',mi:' + '\'' + this.formInline.connect.distance + '\'' +
+          ',flag:' + '\'' + this.formInline.connect.flag + '\'' +
+          ',connect_num:' + '\'' + this.formInline.connect.testNum + '\'' +
+          ',userid:' + '\'' + this.userid + '\'' + '},'
       },
       clear () {
         this.tasks.wait_plan = ''
+        this.tasks.wait_plan_print = ''
       },
       getDeviceInfo (env, device, mac) {
         this.formInline.connect.env = env

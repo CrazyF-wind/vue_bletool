@@ -136,7 +136,6 @@
           'parameter': this.formInline.scan.parameter,
           'userid': this.userid
         }
-        console.log('url:' + this.url)
         this.$http.post('http://' + this.url + '/ScanAutoTestPost', qs.stringify(params)).then(res => {
           console.log(res)
         }).catch(err => {
@@ -161,8 +160,6 @@
       getScanList (taskParam) {
         let that = this
         let nowTime = Number(new Date().getTime() - this.task.beginTime)
-        console.log('nowTime:' + nowTime)
-        console.log('(Number(this.formInline.scan.timer) * 1000):' + (Number(this.formInline.scan.timer) * 1000))
         if (nowTime > (Number(this.formInline.scan.timer) * 1000)) {
           this.percentage = 100
           this.task.scanList += '100% 完成！\n'
@@ -248,7 +245,6 @@
            */
           this.$http.post('http://192.168.82.53:8085/ScanAutoTestPost', qs.stringify(option)).then(response => {
             let resTpye = (response['data'] === 'succeed') ? 'success' : 'info'
-            console.log('response：' + JSON.stringify(response['data']))
             this.$message({
               showClose: true,
               message: response['data'],
@@ -283,9 +279,7 @@
         let resultList = this.tasks.wait_plan_excel
         resultList = resultList.substring(0, resultList.length - 1)
         // this.tasks.wait_plan_excel = '[' + resultList + ']'
-        console.log(`wait_plan:${JSON.stringify({'params': '[' + resultList + ']'})}`)
         this.$http.post('/ble_scan/result_list_export', qs.stringify({'params': '[' + resultList + ']'})).then(response => {
-          console.log(`result:${response.data.data}`)
           window.location.href = this.$file + response.data.data
         })
       },
@@ -294,7 +288,6 @@
         recordList = recordList.substring(0, recordList.length - 1)
         console.log(`wait_plan_print:${JSON.stringify({'params': '[' + recordList + ']'})}`)
         this.$http.post('/ble_scan/query_list_export', qs.stringify({'params': '[' + recordList + ']'})).then(response => {
-          console.log(`query:${response.data.data}`)
           window.location.href = this.$file + response.data.data
         })
       },

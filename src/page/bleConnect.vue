@@ -129,7 +129,9 @@
           'mobile': this.formInline.connect.mobile,
           'mac': this.formInline.connect.mac,
           'name': this.formInline.connect.device,
-          'userid': this.userid
+          'userid': this.userid,
+          'time': new Date().format('yyyy-MM-dd hh:mm:ss'),    // 记录一次自动化测试的起始时间
+          'number': this.formInline.connect.testNum
         }
         let option = {
           'initNum': 1,
@@ -267,7 +269,9 @@
             'mobile': taskParam[3],
             'mi': taskParam[4],
             'flag': taskParam[5],
-            'userid': this.userid
+            'userid': this.userid,
+            'time': new Date().format('yyyy-MM-dd hh:mm:ss'),   // 记录一次自动化测试的起始时间
+            'number': taskParam[6]
           }
           let option = {
             'initNum': currentTest,

@@ -17,7 +17,7 @@ import BleScanChart from '@/page/bleScanChart'
 import BtConnect from '@/page/btConnect'
 import BtConnectChart from '@/page/btConnectChart'
 import Config from '@/page/config'
-import Labs from '@/labs/scroll'
+import Labs from '@/components/upLoadFile'
 
 import Mock from './mock/mock'
 Mock.mockData()

@@ -165,9 +165,8 @@
       this.$http.post('/config/get_url', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
         let url = response.data.data
         this.url = url['host'] + ':' + url['port']
+        this.getConfig()
       })
-
-      this.getConfig()
     },
     methods: {
       addConfig () {

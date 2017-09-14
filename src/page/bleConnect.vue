@@ -10,6 +10,7 @@
           <el-form-item label='flag'>
             <el-input v-model='formInline.connect.flag' placeholder='flag'></el-input>
           </el-form-item>
+          <upLoadFile @getUpLoadFile="getUpLoadFileInfo" :path="path"></upLoadFile>
         </el-form>
       </el-col>
     </el-row>
@@ -56,12 +57,14 @@
   import deviceMacComponent from '../components/deviceMac.vue'
   import connectMobileComponent from '../components/connectMobile.vue'
   import distanceComponent from '../components/distance.vue'
+  import upLoadFileComponent from '../components/upLoadFile.vue'
 
   export default {
     components: {
       deviceMac: deviceMacComponent,
       connectMobile: connectMobileComponent,
-      distance: distanceComponent
+      distance: distanceComponent,
+      upLoadFile: upLoadFileComponent
     },
     data () {
       return {
@@ -85,7 +88,7 @@
           mobile: '',
           distance: 1,
           flag: '',
-          testNum: 0
+          testNum: 1
         },
         task: {
           beginTime: '',      // 开始连接测试时间
@@ -103,12 +106,12 @@
         },
         url: '',
         userid: '',
-        type: 1               // 1:ble设备，0:bt设备
+        type: 1,              // 1:ble设备，0:bt设备
+        path: 'connect'       // 文件上传路径
       }
     },
     created () {
       this.userid = cookie.getCookie('userid')
-
       this.$http.post('/config/get_url', qs.stringify({'userid': cookie.getCookie('userid')})).then(response => {
         let url = response.data.data
         this.url = url['host'] + ':' + url['port']
@@ -318,6 +321,14 @@
       },
       getDistanceInfo (distance) {
         this.formInline.connect.distance = distance
+      },
+      getUpLoadFileInfo (file) {
+        this.formInline.connect.device = file.device
+        this.formInline.connect.mac = file.mac
+        this.formInline.connect.mobile = file.mobile
+        this.formInline.connect.distance = file.distance
+        this.formInline.connect.flag = file.flag
+        this.formInline.connect.testNum = file.testNum
       }
     }
   }

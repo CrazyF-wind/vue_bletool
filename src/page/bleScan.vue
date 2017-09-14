@@ -12,6 +12,7 @@
           <el-form-item label='flag'>
             <el-input v-model='formInline.scan.flag' placeholder='flag'></el-input>
           </el-form-item>
+          <upLoadFile @getUpLoadFile="getUpLoadFileInfo" :path="path"></upLoadFile>
           <el-button type='primary' @click='begin_scan'>运行</el-button>
           <el-button @click='clearScan'>清空</el-button>
           <el-progress :text-inside='true' :stroke-width='18' :percentage='percentage'
@@ -55,12 +56,14 @@
   import deviceMacComponent from '../components/deviceMac.vue'
   import scanMobileComponent from '../components/scanMobile.vue'
   import distanceComponent from '../components/distance.vue'
+  import upLoadFileComponent from '../components/upLoadFile.vue'
 
   export default {
     components: {
       deviceMac: deviceMacComponent,
       scanMobile: scanMobileComponent,
-      distance: distanceComponent
+      distance: distanceComponent,
+      upLoadFile: upLoadFileComponent
     },
     data () {
       return {
@@ -98,6 +101,7 @@
         userid: '',
         url: '',
         type: 1,                    // 1:ble设备，0:bt设备
+        path: 'scan',            // 文件上传路径
         percentage: 0,              // 单次测试进度条
         macName: []                 // 设备mac与名称对应列表
       }
@@ -302,6 +306,13 @@
       },
       getDistanceInfo (distance) {
         this.formInline.scan.distance = distance
+      },
+      getUpLoadFileInfo (file) {
+        this.formInline.connect.device = file.device
+        this.formInline.connect.mac = file.mac
+        this.formInline.connect.mobile = file.mobile
+        this.formInline.connect.distance = file.distance
+        this.formInline.connect.flag = file.flag
       }
     }
   }

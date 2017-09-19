@@ -323,12 +323,13 @@
         this.formInline.connect.distance = distance
       },
       getUpLoadFileInfo (file) {
-        this.formInline.connect.device = file.device
+        console.log(JSON.stringify(file))
+        this.formInline.connect.device = file.name
         this.formInline.connect.mac = file.mac
         this.formInline.connect.mobile = file.mobile
-        this.formInline.connect.distance = file.distance
+        this.formInline.connect.distance = file.mi
         this.formInline.connect.flag = file.flag
-        this.formInline.connect.testNum = file.testNum
+        this.formInline.connect.testNum = file.connect_num
       }
     }
   }

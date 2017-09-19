@@ -308,11 +308,11 @@
         this.formInline.scan.distance = distance
       },
       getUpLoadFileInfo (file) {
-        this.formInline.connect.device = file.device
-        this.formInline.connect.mac = file.mac
-        this.formInline.connect.mobile = file.mobile
-        this.formInline.connect.distance = file.distance
-        this.formInline.connect.flag = file.flag
+        this.formInline.scan.device = file.name
+        this.formInline.scan.mac = file.mac
+        this.formInline.scan.mobile = file.mobile
+        this.formInline.scan.distance = file.mi
+        this.formInline.scan.flag = file.flag
       }
     }
   }

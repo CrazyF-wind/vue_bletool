@@ -24,10 +24,10 @@ Mock.mockData()
 
 Vue.use(VueRouter)
 var $http = axios.create({
-  baseURL: 'http://10.0.0.13:3000/api/'            // 接口服务器地址
+  baseURL: 'http://10.0.0.10:3000/api/'            // 接口服务器地址
 })
 Vue.prototype.$http = $http
-Vue.prototype.$file = 'http://10.0.0.13:3000/'     // 文件下载地址
+Vue.prototype.$file = 'http://10.0.0.10:3000/'     // 文件下载地址
 Vue.use(ElementUI)
 
 let routes = [

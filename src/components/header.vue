@@ -23,12 +23,6 @@
     data () {
       return {}
     },
-    created () {
-      let username = cookie.getCookie('username')
-//      this.user = {
-//        'name': username
-//      }
-    },
     methods: {
       quitSystem () {
         cookie.clearCookie()
